@@ -19,9 +19,9 @@ class CentraFlowAuthWebTest extends TestCase
         $response->assertSee('Sign In to CentraFlow');
     }
 
-    public function test_user_can_login_via_web_form(): void
+    public function test_admin_user_redirects_to_admin_dashboard_after_login(): void
     {
-        $user = User::create([
+        $admin = User::create([
             'name' => 'HR Manager',
             'email' => 'hr@centraflow.local',
             'password' => Hash::make('secret1234'),
@@ -33,8 +33,26 @@ class CentraFlowAuthWebTest extends TestCase
             'password' => 'secret1234',
         ]);
 
+        $response->assertRedirect('/admin/dashboard');
+        $this->assertAuthenticatedAs($admin);
+    }
+
+    public function test_employee_user_redirects_to_launcher_after_login(): void
+    {
+        $employee = User::create([
+            'name' => 'General Employee',
+            'email' => 'emp@centraflow.local',
+            'password' => Hash::make('secret1234'),
+            'role' => 'employee',
+        ]);
+
+        $response = $this->post('/login', [
+            'email' => 'emp@centraflow.local',
+            'password' => 'secret1234',
+        ]);
+
         $response->assertRedirect('/');
-        $this->assertAuthenticatedAs($user);
+        $this->assertAuthenticatedAs($employee);
     }
 
     public function test_user_can_register_new_master_account(): void

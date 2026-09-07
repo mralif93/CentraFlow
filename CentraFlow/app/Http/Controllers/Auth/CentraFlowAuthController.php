@@ -43,6 +43,12 @@ class CentraFlowAuthController extends Controller
                 return redirect()->away($request->input('return_to'));
             }
 
+            // Admins, HR managers, payroll & finance officers redirect to operations dashboard
+            $user = Auth::user();
+            if (in_array($user->role, ['superadmin', 'hr_manager', 'payroll_officer', 'finance_officer'])) {
+                return redirect()->intended(route('admin.dashboard'));
+            }
+
             return redirect()->intended('/');
         }
 
