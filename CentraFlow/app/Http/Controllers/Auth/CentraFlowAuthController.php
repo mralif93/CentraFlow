@@ -38,15 +38,20 @@ class CentraFlowAuthController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
-            // Redirect back to intended destination (e.g. OAuth authorize or sub-system portal)
+            // 1. Explicit return_to parameter
             if ($request->filled('return_to')) {
                 return redirect()->away($request->input('return_to'));
             }
 
-            // Admins, HR managers, payroll & finance officers redirect to operations dashboard
+            // 2. Check if user came from an OAuth authorization request (e.g. /oauth/authorize)
+            if ($request->session()->has('url.intended')) {
+                return redirect()->intended();
+            }
+
+            // 3. Fallback: Admins and officers redirect to admin dashboard
             $user = Auth::user();
             if (in_array($user->role, ['superadmin', 'hr_manager', 'payroll_officer', 'finance_officer'])) {
-                return redirect()->intended(route('admin.dashboard'));
+                return redirect()->route('admin.dashboard');
             }
 
             return redirect()->intended('/');
