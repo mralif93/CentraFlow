@@ -16,8 +16,23 @@ class CentraFlowAuthController extends Controller
     /**
      * Show login view.
      */
-    public function showLogin(Request $request): View
+    public function showLogin(Request $request): View|RedirectResponse
     {
+        // If the user is ALREADY authenticated at CentraFlow:
+        if (Auth::check()) {
+            if ($request->filled('return_to')) {
+                return redirect()->away($request->input('return_to'));
+            }
+            if ($request->session()->has('url.intended')) {
+                return redirect()->intended();
+            }
+            $user = Auth::user();
+            if (in_array($user->role, ['superadmin', 'hr_manager', 'payroll_officer', 'finance_officer'])) {
+                return redirect()->route('admin.dashboard');
+            }
+            return redirect('/');
+        }
+
         return view('auth.login', [
             'returnTo' => $request->query('return_to'),
         ]);
