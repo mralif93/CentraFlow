@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CentraFlow - Enterprise Federated Identity Hub & Microservice Orchestrator</title>
+    <meta name="description" content="Centralized OAuth 2.0 PKCE Authorization Server, Multi-Tenant Session Governance, and Event Mesh for HRMS, Payroll, and Invoicing.">
+
+    <!-- Theme Initialization to prevent FOUC -->
+    <script>
+        if (localStorage.getItem('centraflow_theme') === 'dark' || (!('centraflow_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Boxicons & Animate.css -->
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <!-- Tailwind CSS CDN with configuration -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#EEF2FF',
+                            100: '#E0E7FF',
+                            200: '#C7D2FE',
+                            300: '#A5B4FC',
+                            400: '#818CF8',
+                            500: '#6366F1',
+                            600: '#4F46E5',
+                            700: '#4338CA',
+                            800: '#3730A3',
+                            900: '#312E81',
+                            950: '#1E1B4B',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        }
+        .code-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .glow-indigo {
+            box-shadow: 0 0 50px -10px rgba(99, 102, 241, 0.25);
+        }
+        .glow-radial {
+            background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15), transparent 70%);
+        }
+    </style>
+</head>
+<body class="h-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 antialiased transition-colors duration-200">
+
+    <!-- Top Navigation -->
+    <header class="w-full border-b border-slate-200 dark:border-slate-800/80 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md sticky top-0 z-50 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-indigo-700 flex items-center justify-center text-white shadow-md shadow-indigo-600/30 border border-indigo-400/30">
+                    <i class="bx bx-hive text-2xl font-bold"></i>
+                </div>
+                <div>
+                    <span class="font-black text-xl tracking-tight text-slate-900 dark:text-white">Centra<span class="text-indigo-600 dark:text-indigo-400">Flow</span></span>
+                    <span class="text-[10px] block uppercase font-bold tracking-widest text-slate-400">Federated Identity Mesh</span>
+                </div>
+            </div>
+
+            <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600 dark:text-slate-300">
+                <a href="#overview" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Architecture</a>
+                <a href="#sandbox" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Live Sandboxes</a>
+                <a href="#federation" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Microservices</a>
+                <a href="#event-mesh" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Event Mesh</a>
+                <a href="#matrix" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Attribute Matrix</a>
+            </nav>
+
+            <div class="flex items-center gap-3">
+                <!-- Theme Toggle Button -->
+                <button type="button" onclick="toggleTheme()" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition" aria-label="Toggle Theme">
+                    <i id="theme-icon" class="bx bx-moon text-lg"></i>
+                </button>
+
+                <a href="https://github.com/mralif93/CentraFlow" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 border border-indigo-500/30 transition-all">
+                    <i class="bx bxl-github text-base"></i>
+                    <span>GitHub Repo</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28" id="overview">
+            <div class="absolute inset-0 glow-radial pointer-events-none"></div>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+                
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60 mb-6 animate__animated animate__fadeInDown">
+                    <i class="bx bx-shield-quarter text-sm"></i>
+                    <span>RFC 6749 &bull; RFC 7636 &bull; IEEE 830-1998 Compliant</span>
+                </div>
+
+                <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white tracking-tight leading-tight max-w-4xl mx-auto">
+                    Enterprise Federated Identity Hub &amp; Event Mesh
+                </h1>
+
+                <p class="text-sm sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mt-4 leading-relaxed font-normal">
+                    CentraFlow powers zero-trust Single Sign-On (SSO), cross-application session governance, and decoupled domain event broadcasting across HRMS, Payroll, and Clinic Invoicing.
+                </p>
+
+                <!-- Quick Port Indicators -->
+                <div class="flex flex-wrap items-center justify-center gap-3 mt-8">
+                    <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs text-xs font-bold text-slate-800 dark:text-slate-200">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>Hub Core:</span> <span class="text-indigo-600 dark:text-indigo-400 font-mono">:8004</span>
+                    </span>
+                    <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs text-xs font-bold text-slate-800 dark:text-slate-200">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        <span>HRMS Module:</span> <span class="text-blue-600 dark:text-blue-400 font-mono">:8001</span>
+                    </span>
+                    <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs text-xs font-bold text-slate-800 dark:text-slate-200">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <span>Payroll Module:</span> <span class="text-emerald-600 dark:text-emerald-400 font-mono">:8002</span>
+                    </span>
+                    <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs text-xs font-bold text-slate-800 dark:text-slate-200">
+                        <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                        <span>Clinic Invoicing:</span> <span class="text-purple-600 dark:text-purple-400 font-mono">:8003</span>
+                    </span>
+                </div>
+
+                <!-- CTA Action Buttons -->
+                <div class="flex flex-wrap items-center justify-center gap-4 mt-8">
+                    <a href="#sandbox" class="px-6 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 border border-indigo-500/30 transition-all flex items-center gap-2">
+                        <i class="bx bx-play-circle text-lg"></i>
+                        <span>Launch Interactive Sandboxes</span>
+                    </a>
+                    <a href="https://github.com/mralif93/CentraFlow/tree/master/docs" target="_blank" class="px-6 py-3.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-sm border border-slate-200 dark:border-slate-800 transition-all flex items-center gap-2">
+                        <i class="bx bx-book-open text-lg"></i>
+                        <span>Documentation &amp; SRS</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Sandboxes Section -->
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20" id="sandbox">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Hands-on Client Testing</span>
+                <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mt-1">Interactive Federated Sandboxes</h2>
+                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">Test OAuth 2.0 PKCE authentication loops, simulated sub-system health pinging, and domain event payloads in real-time.</p>
+            </div>
+
+            <!-- Tab Buttons for Sandboxes -->
+            <div class="flex items-center justify-center gap-2 mb-8 flex-wrap">
+                <button onclick="switchSandbox('oauth')" id="tab-btn-oauth" class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-md shadow-indigo-600/30">
+                    <i class="bx bx-lock-alt mr-1"></i> OAuth 2.0 PKCE Simulator
+                </button>
+                <button onclick="switchSandbox('health')" id="tab-btn-health" class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800">
+                    <i class="bx bx-pulse mr-1"></i> Sub-System Health Check
+                </button>
+                <button onclick="switchSandbox('events')" id="tab-btn-events" class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800">
+                    <i class="bx bx-git-commit mr-1"></i> Redis Event Mesh
+                </button>
+                <button onclick="switchSandbox('slo')" id="tab-btn-slo" class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800">
+                    <i class="bx bx-log-out-circle mr-1"></i> Central Single Logout (SLO)
+                </button>
+            </div>
+
+            <!-- Sandbox 1: OAuth 2.0 PKCE Flow Simulator -->
+            <div id="sandbox-oauth" class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm transition-all">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                        <div class="flex items-center gap-2.5 mb-3">
+                            <span class="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg font-bold border border-indigo-200/50 dark:border-indigo-800/50">
+                                <i class="bx bx-key"></i>
+                            </span>
+                            <h3 class="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white">OAuth 2.0 PKCE Handshake Simulator</h3>
+                        </div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
+                            Simulate how client sub-systems initiate authorization code exchange with code challenges, acquire Bearer tokens, and fetch the verified identity profile.
+                        </p>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Target Client Sub-System</label>
+                                <select id="oauth-client-select" onchange="updateOauthClientConfig()" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                                    <option value="hrms">PulseHR Enterprise (:8001) - hrms:read hrms:write</option>
+                                    <option value="payroll">PayFlow MY (:8002) - payroll:run payroll:read</option>
+                                    <option value="clinic">Clinic Invoicing (:8003) - invoice:manage invoice:read</option>
+                                </select>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">Generated State</label>
+                                    <input type="text" id="oauth-state" readonly class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-[11px] font-mono text-slate-600 dark:text-slate-300">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">Code Verifier</label>
+                                    <input type="text" id="oauth-verifier" readonly class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-[11px] font-mono text-slate-600 dark:text-slate-300">
+                                </div>
+                            </div>
+
+                            <div class="pt-2 flex items-center gap-3">
+                                <button onclick="runOauthSimulationStep(1)" id="btn-oauth-step-1" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-md shadow-indigo-600/30">
+                                    1. Authorize &rarr; Code
+                                </button>
+                                <button onclick="runOauthSimulationStep(2)" id="btn-oauth-step-2" disabled class="px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-400 text-xs font-bold transition cursor-not-allowed">
+                                    2. Exchange Token
+                                </button>
+                                <button onclick="runOauthSimulationStep(3)" id="btn-oauth-step-3" disabled class="px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-400 text-xs font-bold transition cursor-not-allowed">
+                                    3. Verify Profile (/me)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sandbox 1 Console Output -->
+                    <div class="bg-slate-950 rounded-2xl border border-slate-800 p-5 flex flex-col justify-between">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
+                            <span class="text-xs font-mono font-bold text-indigo-400 flex items-center gap-1.5">
+                                <i class="bx bx-terminal"></i>
+                                <span>OAuth 2.0 Response Log</span>
+                            </span>
+                            <span id="oauth-flow-step" class="text-[10px] uppercase font-bold text-slate-400 font-mono">Ready to initiate</span>
+                        </div>
+                        <pre id="oauth-console-output" class="text-xs font-mono text-emerald-400 overflow-x-auto whitespace-pre leading-relaxed flex-1">// Click '1. Authorize -> Code' to generate OAuth authorization request</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sandbox 2: Real-Time Sub-System Health Check -->
+            <div id="sandbox-health" class="hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm transition-all">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <i class="bx bx-check-shield text-indigo-600 dark:text-indigo-400 text-xl"></i>
+                            <h3 class="font-extrabold text-lg text-slate-900 dark:text-white">Federated Microservice Health Ping</h3>
+                        </div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Live simulation of gateway socket connectivity across all three federated applications.</p>
+                    </div>
+                    <button onclick="pingAllSubsystems()" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-md shadow-indigo-600/30">
+                        <i class="bx bx-refresh"></i>
+                        <span>Re-Ping Microservices</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <!-- HRMS Card -->
+                    <div class="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xl font-bold">
+                                <i class="bx bxs-user-badge"></i>
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span>Online (200)</span>
+                            </span>
+                        </div>
+                        <h4 class="font-extrabold text-slate-900 dark:text-white text-base">PulseHR Enterprise</h4>
+                        <p class="text-[11px] text-slate-400 font-mono mt-0.5">human-resources-management-system</p>
+                        <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 text-xs space-y-1.5 text-slate-600 dark:text-slate-400">
+                            <div class="flex justify-between"><span>Port Node:</span><span class="font-mono font-bold text-slate-800 dark:text-slate-200">:8001</span></div>
+                            <div class="flex justify-between"><span>OAuth Scopes:</span><code class="text-indigo-600 dark:text-indigo-300 text-[10px]">hrms:read hrms:write</code></div>
+                            <div class="flex justify-between"><span>Latency:</span><span class="text-emerald-600 dark:text-emerald-400 font-mono">1.2ms</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Payroll Card -->
+                    <div class="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl font-bold">
+                                <i class="bx bx-wallet"></i>
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span>Online (200)</span>
+                            </span>
+                        </div>
+                        <h4 class="font-extrabold text-slate-900 dark:text-white text-base">PayFlow MY</h4>
+                        <p class="text-[11px] text-slate-400 font-mono mt-0.5">payroll-management-system</p>
+                        <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 text-xs space-y-1.5 text-slate-600 dark:text-slate-400">
+                            <div class="flex justify-between"><span>Port Node:</span><span class="font-mono font-bold text-slate-800 dark:text-slate-200">:8002</span></div>
+                            <div class="flex justify-between"><span>OAuth Scopes:</span><code class="text-indigo-600 dark:text-indigo-300 text-[10px]">payroll:run payroll:read</code></div>
+                            <div class="flex justify-between"><span>Latency:</span><span class="text-emerald-600 dark:text-emerald-400 font-mono">1.8ms</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Clinic Invoicing Card -->
+                    <div class="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xl font-bold">
+                                <i class="bx bx-receipt"></i>
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span>Online (200)</span>
+                            </span>
+                        </div>
+                        <h4 class="font-extrabold text-slate-900 dark:text-white text-base">Clinic Invoicing (CIS)</h4>
+                        <p class="text-[11px] text-slate-400 font-mono mt-0.5">clinic-invoice-system</p>
+                        <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 text-xs space-y-1.5 text-slate-600 dark:text-slate-400">
+                            <div class="flex justify-between"><span>Port Node:</span><span class="font-mono font-bold text-slate-800 dark:text-slate-200">:8003</span></div>
+                            <div class="flex justify-between"><span>OAuth Scopes:</span><code class="text-indigo-600 dark:text-indigo-300 text-[10px]">invoice:manage invoice:read</code></div>
+                            <div class="flex justify-between"><span>Latency:</span><span class="text-emerald-600 dark:text-emerald-400 font-mono">0.9ms</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sandbox 3: Redis Domain Event Mesh Inspector -->
+            <div id="sandbox-events" class="hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm transition-all">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div>
+                        <h3 class="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white mb-2">Decoupled Redis Event Topics</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-6">In accordance with SRS Section 5, sub-systems do not perform direct cross-database SQL queries. State changes are broadcast across Redis channels.</p>
+
+                        <div class="space-y-3">
+                            <button onclick="previewEventPayload('leave')" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 hover:border-indigo-500 text-left transition flex items-center justify-between">
+                                <div>
+                                    <div class="font-bold text-xs text-slate-900 dark:text-white">LeaveApproved</div>
+                                    <div class="text-[10px] text-slate-400 font-mono">HRMS &rarr; Payroll (Wage Deduct)</div>
+                                </div>
+                                <i class="bx bx-chevron-right text-slate-400"></i>
+                            </button>
+
+                            <button onclick="previewEventPayload('claim')" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 hover:border-indigo-500 text-left transition flex items-center justify-between">
+                                <div>
+                                    <div class="font-bold text-xs text-slate-900 dark:text-white">ClaimApproved</div>
+                                    <div class="text-[10px] text-slate-400 font-mono">HRMS &rarr; Payroll (Reimbursements)</div>
+                                </div>
+                                <i class="bx bx-chevron-right text-slate-400"></i>
+                            </button>
+
+                            <button onclick="previewEventPayload('timesheet')" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 hover:border-indigo-500 text-left transition flex items-center justify-between">
+                                <div>
+                                    <div class="font-bold text-xs text-slate-900 dark:text-white">TimesheetApproved</div>
+                                    <div class="text-[10px] text-slate-400 font-mono">HRMS &rarr; Clinic Billing</div>
+                                </div>
+                                <i class="bx bx-chevron-right text-slate-400"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Sandbox 3 Event JSON Preview -->
+                    <div class="lg:col-span-2 bg-slate-950 rounded-2xl border border-slate-800 p-5 flex flex-col justify-between">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
+                            <span class="text-xs font-mono font-bold text-indigo-400 flex items-center gap-1.5">
+                                <i class="bx bx-code-block"></i>
+                                <span id="event-topic-title">Topic: centraflow.events.leave_approved</span>
+                            </span>
+                            <span class="text-[10px] uppercase font-bold text-emerald-400 font-mono">Redis Stream Validated</span>
+                        </div>
+                        <pre id="event-json-output" class="text-xs font-mono text-indigo-300 overflow-x-auto whitespace-pre leading-relaxed">{
+  "event_id": "0191c45a-8bc0-711e-b83c-1b772cf89091",
+  "event_type": "LeaveApproved",
+  "origin_module": "hrms",
+  "timestamp": "2026-09-07T09:30:00Z",
+  "payload": {
+    "employee_uuid": "e30e1df5-2cfc-469b-9ffb-14b35e23da91",
+    "leave_type": "unpaid",
+    "days": 2.5,
+    "start_date": "2026-09-15",
+    "end_date": "2026-09-17",
+    "approved_by_uuid": "8f8b725c-8df0-4b95-a226-c2eb391f1ad7"
+  }
+}</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sandbox 4: Central Single Logout (SLO) -->
+            <div id="sandbox-slo" class="hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm transition-all">
+                <div class="max-w-3xl mx-auto text-center">
+                    <div class="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                        <i class="bx bx-log-out-circle"></i>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">Centralized Single Sign-Out (SLO)</h3>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xl mx-auto leading-relaxed">
+                        When an administrator or employee signs out of any sub-system portal, CentraFlow guarantees comprehensive session destruction across both the local client cookie and the master IdP session.
+                    </p>
+
+                    <div class="mt-8 p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 text-left text-xs font-mono space-y-3">
+                        <div class="flex items-center justify-between text-slate-600 dark:text-slate-400">
+                            <span>1. Client Session Destroyed:</span>
+                            <span class="text-emerald-500 font-bold">Session::flush()</span>
+                        </div>
+                        <div class="flex items-center justify-between text-slate-600 dark:text-slate-400">
+                            <span>2. OAuth Token Revocation:</span>
+                            <span class="text-emerald-500 font-bold">Token::where('user_id', ...)->revoke()</span>
+                        </div>
+                        <div class="flex items-center justify-between text-slate-600 dark:text-slate-400">
+                            <span>3. Master Session Clear:</span>
+                            <span class="text-indigo-400 font-bold">GET http://localhost:8004/logout</span>
+                        </div>
+                        <div class="flex items-center justify-between text-slate-600 dark:text-slate-400">
+                            <span>4. Cookie Collision Shield:</span>
+                            <span class="text-purple-400 font-bold">centraflow_session &ne; pulsehr_session</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Microservices Federation Overview -->
+        <section class="border-t border-slate-200 dark:border-slate-800/80 bg-white/70 dark:bg-slate-900/60 py-16" id="federation">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-12">
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Hub &amp; Spoke Topology</span>
+                    <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mt-1">Federated Application Matrix</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">Every sub-system operates as an autonomous bounded context while authenticating through CentraFlow.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Card 1 -->
+                    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-mono text-xs font-bold">:8001</span>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase font-mono">Port Node</span>
+                            </div>
+                            <h3 class="text-base font-extrabold text-slate-900 dark:text-white">PulseHR Management Suite</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+                                Core personnel master (PIM), HTML5 geofenced mobile attendance, multi-tier leave approval loops, and quarterly performance OKRs.
+                            </p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+                            <a href="https://github.com/mralif93/human-resources-management-system" target="_blank" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
+                                <span>Inspect HRMS Repository</span>
+                                <i class="bx bx-link-external"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-mono text-xs font-bold">:8002</span>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase font-mono">Port Node</span>
+                            </div>
+                            <h3 class="text-base font-extrabold text-slate-900 dark:text-white">PayFlow MY Payroll Suite</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+                                Statutory payroll computation engine (KWSP / EPF, PERKESO / SOCSO, EIS, PCB) with batch banking disbursement generation.
+                            </p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+                            <a href="https://github.com/mralif93/payroll-management-system" target="_blank" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
+                                <span>Inspect Payroll Repository</span>
+                                <i class="bx bx-link-external"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="px-2.5 py-1 rounded-lg bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 font-mono text-xs font-bold">:8003</span>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase font-mono">Port Node</span>
+                            </div>
+                            <h3 class="text-base font-extrabold text-slate-900 dark:text-white">Clinic Invoicing System (CIS)</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+                                Front-desk patient billing, medical treatment catalog, multi-tender settlement, 80mm ESC/POS thermal printing, and A4 tax invoices.
+                            </p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+                            <a href="https://github.com/mralif93/clinic-invoice-system" target="_blank" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
+                                <span>Inspect Invoicing Repository</span>
+                                <i class="bx bx-link-external"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Attribute Matrix Section -->
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20" id="matrix">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Data Contract Normalization</span>
+                <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mt-1">Unified Identity Synchronization</h2>
+                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">Every sub-system maps CentraFlow's standardized token profile to local schema representations.</p>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+                        <thead class="bg-slate-50 dark:bg-slate-950 text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-800">
+                            <tr>
+                                <th class="py-3.5 px-6">CentraFlow Payload Key</th>
+                                <th class="py-3.5 px-6">HRMS Schema</th>
+                                <th class="py-3.5 px-6">Payroll Schema</th>
+                                <th class="py-3.5 px-6">Clinic Invoicing Schema</th>
+                                <th class="py-3.5 px-6">Data Normalization Role</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
+                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition">
+                                <td class="py-3.5 px-6 font-mono font-bold text-indigo-600 dark:text-indigo-400">uuid</td>
+                                <td class="py-3.5 px-6 font-mono">users.centraflow_uuid</td>
+                                <td class="py-3.5 px-6 font-mono">users.centraflow_uuid</td>
+                                <td class="py-3.5 px-6 font-mono">users.centraflow_uuid</td>
+                                <td class="py-3.5 px-6 text-slate-500 dark:text-slate-400">Immutable Global Primary Key</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition">
+                                <td class="py-3.5 px-6 font-mono font-bold text-indigo-600 dark:text-indigo-400">staff_id</td>
+                                <td class="py-3.5 px-6 font-mono">employees.employee_code</td>
+                                <td class="py-3.5 px-6 font-mono">employees.staff_id</td>
+                                <td class="py-3.5 px-6 font-mono">users.staff_id</td>
+                                <td class="py-3.5 px-6 text-slate-500 dark:text-slate-400">Corporate Employee Badge ID</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition">
+                                <td class="py-3.5 px-6 font-mono font-bold text-indigo-600 dark:text-indigo-400">role</td>
+                                <td class="py-3.5 px-6 font-mono">spatie_roles (HR Admin/Staff)</td>
+                                <td class="py-3.5 px-6 font-mono">users.role (Payroll Officer)</td>
+                                <td class="py-3.5 px-6 font-mono">users.role (Doctor/Receptionist)</td>
+                                <td class="py-3.5 px-6 text-slate-500 dark:text-slate-400">Role-Based Access Control (RBAC)</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition">
+                                <td class="py-3.5 px-6 font-mono font-bold text-indigo-600 dark:text-indigo-400">department</td>
+                                <td class="py-3.5 px-6 font-mono">departments.name</td>
+                                <td class="py-3.5 px-6 font-mono">cost_centers.name</td>
+                                <td class="py-3.5 px-6 font-mono">branches.department</td>
+                                <td class="py-3.5 px-6 text-slate-500 dark:text-slate-400">Organizational Unit Mapping</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition">
+                                <td class="py-3.5 px-6 font-mono font-bold text-indigo-600 dark:text-indigo-400">status</td>
+                                <td class="py-3.5 px-6 font-mono">active / resigned / leave</td>
+                                <td class="py-3.5 px-6 font-mono">active / inactive</td>
+                                <td class="py-3.5 px-6 font-mono">active / suspended</td>
+                                <td class="py-3.5 px-6 text-slate-500 dark:text-slate-400">Operational Eligibility State</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs py-12 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <span class="font-extrabold text-slate-900 dark:text-white">CentraFlow Core</span>
+                <span>&bull;</span>
+                <span class="text-slate-500 dark:text-slate-400">OAuth 2.0 &bull; Redis Orchestration Hub</span>
+            </div>
+            <div class="flex items-center gap-4 text-slate-500 dark:text-slate-400">
+                <a href="https://github.com/mralif93/CentraFlow" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">GitHub</a>
+                <a href="https://github.com/mralif93/human-resources-management-system" class="hover:text-blue-500 transition">HRMS</a>
+                <a href="https://github.com/mralif93/payroll-management-system" class="hover:text-emerald-500 transition">Payroll</a>
+                <a href="https://github.com/mralif93/clinic-invoice-system" class="hover:text-purple-500 transition">Clinic CIS</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Client Interactive Logic -->
+    <script>
+        // Theme Toggle
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('centraflow_theme', isDark ? 'dark' : 'light');
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const icon = document.getElementById('theme-icon');
+            if (document.documentElement.classList.contains('dark')) {
+                icon.className = 'bx bx-sun text-lg';
+            } else {
+                icon.className = 'bx bx-moon text-lg';
+            }
+        }
+        updateThemeIcon();
+
+        // Switch Sandbox Tabs
+        function switchSandbox(name) {
+            ['oauth', 'health', 'events', 'slo'].forEach(tab => {
+                const el = document.getElementById('sandbox-' + tab);
+                const btn = document.getElementById('tab-btn-' + tab);
+                if (tab === name) {
+                    el.classList.remove('hidden');
+                    btn.className = 'px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-md shadow-indigo-600/30';
+                } else {
+                    el.classList.add('hidden');
+                    btn.className = 'px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800';
+                }
+            });
+        }
+
+        // Sandbox 1: OAuth Simulator
+        const oauthClients = {
+            hrms: {
+                name: "PulseHR Enterprise",
+                port: ":8001",
+                id: "9d12a101-0001-4000-8000-000000000001",
+                redirect: "http://localhost:8001/auth/callback",
+                scopes: "hrms:read hrms:write",
+                user: {
+                    uuid: "e30e1df5-2cfc-469b-9ffb-14b35e23da91",
+                    name: "Sarah Jenkins",
+                    email: "hr.manager@centraflow.local",
+                    role: "hr_manager",
+                    staff_id: "EMP-2026-0042",
+                    department: "People Operations"
+                }
+            },
+            payroll: {
+                name: "PayFlow MY",
+                port: ":8002",
+                id: "9d12a101-0002-4000-8000-000000000002",
+                redirect: "http://localhost:8002/auth/callback",
+                scopes: "payroll:run payroll:read",
+                user: {
+                    uuid: "8f8b725c-8df0-4b95-a226-c2eb391f1ad7",
+                    name: "Alex Payroll Officer",
+                    email: "payroll@centraflow.local",
+                    role: "payroll_officer",
+                    staff_id: "PAY-2026-0008",
+                    department: "Finance & Accounts"
+                }
+            },
+            clinic: {
+                name: "Clinic Invoicing",
+                port: ":8003",
+                id: "9d12a101-0003-4000-8000-000000000003",
+                redirect: "http://localhost:8003/auth/callback",
+                scopes: "invoice:manage invoice:read",
+                user: {
+                    uuid: "1b88e001-2cfc-469b-9ffb-14b35e23db99",
+                    name: "Dr. Adam Specialist",
+                    email: "doctor@centraflow.local",
+                    role: "doctor",
+                    staff_id: "ADM-001",
+                    department: "Outpatient Clinic"
+                }
+            }
+        };
+
+        function initOauthTokens() {
+            document.getElementById('oauth-state').value = 'cf_state_' + Math.random().toString(36).substring(2, 12);
+            document.getElementById('oauth-verifier').value = 'cf_pkce_' + Math.random().toString(36).substring(2, 16);
+        }
+        initOauthTokens();
+
+        function updateOauthClientConfig() {
+            initOauthTokens();
+            document.getElementById('oauth-console-output').textContent = "// Client selected. Click '1. Authorize -> Code' to generate authorization handshake.";
+            document.getElementById('oauth-flow-step').textContent = 'Ready';
+            resetOauthButtons();
+        }
+
+        function resetOauthButtons() {
+            const b2 = document.getElementById('btn-oauth-step-2');
+            const b3 = document.getElementById('btn-oauth-step-3');
+            b2.disabled = true;
+            b2.className = 'px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-400 text-xs font-bold transition cursor-not-allowed';
+            b3.disabled = true;
+            b3.className = 'px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-400 text-xs font-bold transition cursor-not-allowed';
+        }
+
+        let simulatedCode = '';
+        let simulatedAccessToken = '';
+
+        function runOauthSimulationStep(step) {
+            const clientKey = document.getElementById('oauth-client-select').value;
+            const client = oauthClients[clientKey];
+            const consoleEl = document.getElementById('oauth-console-output');
+            const statusEl = document.getElementById('oauth-flow-step');
+
+            if (step === 1) {
+                simulatedCode = 'authcode_' + Math.random().toString(36).substring(2, 18);
+                statusEl.textContent = 'Code Issued (200)';
+                consoleEl.textContent = `// STEP 1: Authorization Code Request
+GET http://localhost:8004/oauth/authorize?
+  response_type=code
+  &client_id=${client.id}
+  &redirect_uri=${encodeURIComponent(client.redirect)}
+  &scope=${encodeURIComponent(client.scopes)}
+  &state=${document.getElementById('oauth-state').value}
+
+HTTP/1.1 302 Found
+Location: ${client.redirect}?code=${simulatedCode}&state=${document.getElementById('oauth-state').value}
+
+// Code securely delivered to callback controller. Ready for token exchange.`;
+
+                const b2 = document.getElementById('btn-oauth-step-2');
+                b2.disabled = false;
+                b2.className = 'px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-md shadow-indigo-600/30';
+            } else if (step === 2) {
+                simulatedAccessToken = 'eyJh' + Math.random().toString(36).substring(2, 24) + '...' + Math.random().toString(36).substring(2, 24);
+                statusEl.textContent = 'Token Granted';
+                consoleEl.textContent = `// STEP 2: Token POST Request
+POST http://localhost:8004/oauth/token
+Host: localhost:8004
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code
+&client_id=${client.id}
+&client_secret=centraflow_secret_***
+&redirect_uri=${encodeURIComponent(client.redirect)}
+&code=${simulatedCode}
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "token_type": "Bearer",
+  "expires_in": 86400,
+  "access_token": "${simulatedAccessToken}",
+  "refresh_token": "def50200..."
+}`;
+
+                const b3 = document.getElementById('btn-oauth-step-3');
+                b3.disabled = false;
+                b3.className = 'px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-md shadow-emerald-600/30';
+            } else if (step === 3) {
+                statusEl.textContent = 'Profile Verified';
+                consoleEl.textContent = `// STEP 3: Identity Verification Endpoint
+GET http://localhost:8004/api/v1/me
+Authorization: Bearer ${simulatedAccessToken}
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "status": "success",
+  "data": {
+    "uuid": "${client.user.uuid}",
+    "name": "${client.user.name}",
+    "email": "${client.user.email}",
+    "role": "${client.user.role}",
+    "staff_id": "${client.user.staff_id}",
+    "department": "${client.user.department}",
+    "scopes": [
+      ${client.scopes.split(' ').map(s => `"${s}"`).join(', ')}
+    ]
+  }
+}
+
+// User successfully authenticated in ${client.name}!`;
+            }
+        }
+
+        // Sandbox 2: Health Check Simulator
+        function pingAllSubsystems() {
+            alert('Initiating real-time socket health ping across :8001, :8002, and :8003...\nAll 3 nodes responded with HTTP 200 OK in < 2ms.');
+        }
+
+        // Sandbox 3: Event Mesh Preview
+        const eventPayloads = {
+            leave: {
+                title: "Topic: centraflow.events.leave_approved",
+                json: `{
+  "event_id": "0191c45a-8bc0-711e-b83c-1b772cf89091",
+  "event_type": "LeaveApproved",
+  "origin_module": "hrms",
+  "timestamp": "2026-09-07T09:30:00Z",
+  "payload": {
+    "employee_uuid": "e30e1df5-2cfc-469b-9ffb-14b35e23da91",
+    "leave_type": "unpaid",
+    "days": 2.5,
+    "start_date": "2026-09-15",
+    "end_date": "2026-09-17",
+    "approved_by_uuid": "8f8b725c-8df0-4b95-a226-c2eb391f1ad7"
+  }
+}`
+            },
+            claim: {
+                title: "Topic: centraflow.events.claim_approved",
+                json: `{
+  "event_id": "0191c45a-8bc0-711e-b83c-1b772cf89092",
+  "event_type": "ClaimApproved",
+  "origin_module": "hrms",
+  "timestamp": "2026-09-07T09:35:00Z",
+  "payload": {
+    "employee_uuid": "e30e1df5-2cfc-469b-9ffb-14b35e23da91",
+    "claim_type": "medical",
+    "amount": 185.50,
+    "currency": "MYR"
+  }
+}`
+            },
+            timesheet: {
+                title: "Topic: centraflow.events.timesheet_approved",
+                json: `{
+  "event_id": "0191c45a-8bc0-711e-b83c-1b772cf89093",
+  "event_type": "TimesheetApproved",
+  "origin_module": "hrms",
+  "timestamp": "2026-09-07T09:40:00Z",
+  "payload": {
+    "practitioner_uuid": "e30e1df5-2cfc-469b-9ffb-14b35e23da91",
+    "hours_billed": 8.0,
+    "treatment_code": "CONSULT-GEN-01"
+  }
+}`
+            }
+        };
+
+        function previewEventPayload(type) {
+            const data = eventPayloads[type];
+            document.getElementById('event-topic-title').textContent = data.title;
+            document.getElementById('event-json-output').textContent = data.json;
+        }
+    </script>
+</body>
+</html>
