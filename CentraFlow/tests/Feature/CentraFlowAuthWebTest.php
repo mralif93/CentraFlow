@@ -82,4 +82,14 @@ class CentraFlowAuthWebTest extends TestCase
         $response->assertRedirect('/');
         $this->assertGuest();
     }
+
+    public function test_user_can_logout_with_federated_redirect_uri(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get('/logout?redirect_uri=' . urlencode('http://localhost:8002/login'));
+
+        $response->assertRedirect('http://localhost:8002/login');
+        $this->assertGuest();
+    }
 }

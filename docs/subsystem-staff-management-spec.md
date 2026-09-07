@@ -334,12 +334,47 @@ class CentraFlowLoginController extends Controller
 
 ---
 
-## 6. Summary of Architectural Advantages
+## 6. Federated Single Logout (SLO) Integration Directives
+
+To guarantee that ending a session in one application closes all enterprise sessions, every sub-system must route its logout action through CentraFlow's central logout endpoint:
+
+```http
+GET http://localhost:8004/logout?redirect_uri={ENCODED_LOCAL_LOGIN_URL}
+```
+
+### 6.1 Sub-System Logout Controller Pattern (HRMS, Payroll, CIS)
+In each sub-system's logout method, destroy the local session and bounce the browser to CentraFlow:
+
+```php
+public function logout(Request $request)
+{
+    // 1. Destroy local sub-system session
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    // 2. Redirect to CentraFlow to terminate master SSO session
+    $returnUrl = route('login');
+    $centraflowLogoutUrl = config('services.centraflow.url') . '/logout?redirect_uri=' . urlencode($returnUrl);
+
+    return redirect()->away($centraflowLogoutUrl);
+}
+```
+
+### 6.2 Security Outcome:
+1. CentraFlow terminates the master identity session cookie (`centraflow_session`).
+2. CentraFlow bounces the user back to the sub-system login page.
+3. The user cannot access any of the other two sub-systems without authenticating again with their password.
+
+---
+
+## 7. Summary of Architectural Advantages
 
 | Metric | Decentralized (Old) | CentraFlow Federated (New) |
 | :--- | :--- | :--- |
 | **Staff Directory** | Fragmented across 3 databases | Single master registry in CentraFlow |
 | **User Deactivation** | Must delete/suspend 3 separate accounts | 1-Click suspension in CentraFlow blocks all 3 systems |
+| **Single Logout (SLO)**| Disjointed (user remains logged into others) | Federated SLO terminates master identity everywhere |
 | **Role Maintenance** | Confusing mismatches across portals | Explicit `access_control[system].role` resolved automatically |
 | **Password Security** | Passwords duplicated in multiple tables | Passwords exist **only** inside CentraFlow Hub |
 | **Audit & Governance** | No central visibility | Complete token & session revoking from CentraFlow console |

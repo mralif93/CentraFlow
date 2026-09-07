@@ -91,15 +91,23 @@ class CentraFlowAuthController extends Controller
     }
 
     /**
-     * Terminate active session across all systems.
+     * Terminate active session across all systems (Federated Single Logout).
      */
     public function logout(Request $request): RedirectResponse
     {
+        $user = Auth::user();
+
+        // If a specific OAuth token ID or Bearer token was provided, revoke it
+        if ($tokenId = $request->query('token_id')) {
+            \Laravel\Passport\Token::where('id', $tokenId)->update(['revoked' => true]);
+        }
+
         Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        // Redirect back to caller sub-system or fallback to home
         if ($redirect = $request->query('redirect_uri')) {
             return redirect()->away($redirect);
         }
