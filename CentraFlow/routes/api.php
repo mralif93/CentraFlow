@@ -13,6 +13,7 @@ Route::prefix('v1')->group(function () {
                 'name' => $user->name,
                 'email' => $user->email,
                 'staff_id' => $user->staff_id,
+                'employee_code' => $user->staff_id,
                 'phone' => $user->phone,
                 'role' => $user->role,
                 'department' => $user->department,
