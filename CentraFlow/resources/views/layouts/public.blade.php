@@ -53,15 +53,15 @@
             <!-- Navigation Links -->
             <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600 dark:text-slate-300">
                 <a href="{{ route('home') }}" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors {{ request()->routeIs('home') ? 'text-indigo-600 dark:text-indigo-400 font-bold' : '' }}">Launcher</a>
-                <a href="http://localhost:8001/login" target="_blank" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1">
+                <a href="http://localhost:8001/auth/centraflow" target="_blank" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1">
                     <span>HRMS</span>
                     <span class="px-1.5 py-0.2 text-[9px] font-mono rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">:8001</span>
                 </a>
-                <a href="http://localhost:8002/login" target="_blank" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center gap-1">
+                <a href="http://localhost:8002/auth/centraflow" target="_blank" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center gap-1">
                     <span>Payroll</span>
                     <span class="px-1.5 py-0.2 text-[9px] font-mono rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">:8002</span>
                 </a>
-                <a href="http://localhost:8003/login" target="_blank" class="hover:text-purple-600 dark:hover:text-purple-400 transition-colors flex items-center gap-1">
+                <a href="http://localhost:8003/auth/centraflow" target="_blank" class="hover:text-purple-600 dark:hover:text-purple-400 transition-colors flex items-center gap-1">
                     <span>Invoicing</span>
                     <span class="px-1.5 py-0.2 text-[9px] font-mono rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">:8003</span>
                 </a>
