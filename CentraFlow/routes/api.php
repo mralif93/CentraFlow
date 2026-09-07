@@ -25,6 +25,7 @@ Route::prefix('v1')->group(function () {
                     'payroll' => $user->getSubsystemRole('payroll'),
                     'clinic' => $user->getSubsystemRole('clinic'),
                 ],
+                'access_control' => $user->getSubsystemAccess(),
                 'scopes' => $request->user()->token()?->scopes ?? [],
             ],
         ]);

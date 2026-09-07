@@ -228,10 +228,11 @@ Duration: 0.35s
 
 Detailed specifications, interface protocols, and integration guides:
 1. 📄 **[Software Requirements Specification (SRS)](docs/software-requirement-specifications.md)** — Full IEEE 830-1998 standard specification.
-2. 📄 **[Access Control & Permission Architecture Guide](docs/access-control-guide.md)** — Unified RBAC catalog, `/api/v1/me` permissions, and sub-system adoption directives.
-3. 📄 **[Sub-System SSO Authentication Guide](docs/subsystem-auth-guide.md)** — Step-by-step OAuth 2.0 client implementation for sub-systems.
-4. 📄 **[Integration Contracts & Event Schemas](docs/integration-contracts.md)** — Detailed JSON payloads and Redis channel topologies.
-5. 📄 **[SSO Client Developer Guide](docs/sso-client-guide.md)** — Quick start for third-party microservice integration.
+2. 📄 **[Sub-System Staff & Access Control Specification](docs/subsystem-staff-management-spec.md)** — Architectural requirements and implementation code for HRMS, Payroll, and CIS.
+3. 📄 **[Access Control & Permission Architecture Guide](docs/access-control-guide.md)** — Unified RBAC catalog, `/api/v1/me` permissions, and sub-system adoption directives.
+4. 📄 **[Sub-System SSO Authentication Guide](docs/subsystem-auth-guide.md)** — Step-by-step OAuth 2.0 client implementation for sub-systems.
+5. 📄 **[Integration Contracts & Event Schemas](docs/integration-contracts.md)** — Detailed JSON payloads and Redis channel topologies.
+6. 📄 **[SSO Client Developer Guide](docs/sso-client-guide.md)** — Quick start for third-party microservice integration.
 
 ---
 

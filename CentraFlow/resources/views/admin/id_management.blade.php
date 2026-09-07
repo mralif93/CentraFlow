@@ -96,8 +96,8 @@
                     <tr>
                         <th class="py-3.5 px-4">User</th>
                         <th class="py-3.5 px-4">Staff ID / Contact</th>
-                        <th class="py-3.5 px-4">Master UUID</th>
-                        <th class="py-3.5 px-4">Role &amp; Department</th>
+                        <th class="py-3.5 px-4">Master Role &amp; Dept</th>
+                        <th class="py-3.5 px-4">Sub-System Clearance</th>
                         <th class="py-3.5 px-4">Status</th>
                         <th class="py-3.5 px-4">Joined</th>
                         <th class="py-3.5 px-4 text-right">Actions</th>
@@ -105,6 +105,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
                     @foreach ($users as $user)
+                        @php $access = $user->getSubsystemAccess(); @endphp
                         <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-900/40 transition-colors">
                             <td class="py-3.5 px-4">
                                 <div class="font-semibold text-slate-900 dark:text-white text-sm">{{ $user->name }}</div>
@@ -113,9 +114,6 @@
                             <td class="py-3.5 px-4">
                                 <div class="font-mono font-semibold text-slate-800 dark:text-slate-200">{{ $user->staff_id ?? 'N/A' }}</div>
                                 <div class="text-slate-500 dark:text-slate-400 text-[11px]">{{ $user->phone ?? '—' }}</div>
-                            </td>
-                            <td class="py-3.5 px-4 font-mono text-indigo-600 dark:text-indigo-300">
-                                {{ $user->uuid }}
                             </td>
                             <td class="py-3.5 px-4">
                                 <div>
@@ -134,6 +132,19 @@
                                 </div>
                             </td>
                             <td class="py-3.5 px-4">
+                                <div class="flex flex-wrap gap-1">
+                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium {{ $access['hrms']['allowed'] ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 line-through' }}" title="{{ $access['hrms']['allowed'] ? 'HRMS: ' . $access['hrms']['role'] : 'HRMS: Blocked' }}">
+                                        HRMS
+                                    </span>
+                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium {{ $access['payroll']['allowed'] ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 line-through' }}" title="{{ $access['payroll']['allowed'] ? 'Payroll: ' . $access['payroll']['role'] : 'Payroll: Blocked' }}">
+                                        Payroll
+                                    </span>
+                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium {{ $access['clinic']['allowed'] ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 line-through' }}" title="{{ $access['clinic']['allowed'] ? 'Clinic: ' . $access['clinic']['role'] : 'Clinic: Blocked' }}">
+                                        Clinic
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="py-3.5 px-4">
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase {{ $user->status === 'active' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20' }}">
                                     {{ $user->status ?? 'active' }}
                                 </span>
@@ -145,7 +156,7 @@
                                 <form method="POST" action="{{ route('admin.id-management.revoke-user-sessions', $user->id) }}" class="inline">
                                     @csrf
                                     <button type="submit" title="Kill all active sessions & tokens" class="px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-medium transition-all">
-                                        Revoke Sessions
+                                        Revoke
                                     </button>
                                 </form>
 
@@ -278,11 +289,14 @@
         </div>
     </div>
 
-    <!-- Create Identity Modal -->
+    <!-- Create Master Staff Identity Modal -->
     <div x-show="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/75 backdrop-blur-sm" style="display: none;">
-        <div @click.away="showCreateModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+        <div @click.away="showCreateModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-bold text-slate-900 dark:text-white">Create New Master Identity</h3>
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Create Master Staff Identity</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Centralized profile and multi-subsystem access rights.</p>
+                </div>
                 <button @click="showCreateModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -290,55 +304,115 @@
                 </button>
             </div>
 
-            <form method="POST" action="{{ route('admin.id-management.store-user') }}" class="space-y-3">
+            <form method="POST" action="{{ route('admin.id-management.store-user') }}" class="space-y-4">
                 @csrf
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Full Name</label>
-                        <input type="text" name="name" required class="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
+                
+                <div class="space-y-3">
+                    <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">1. Core Profile Details</div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Full Name</label>
+                            <input type="text" name="name" required class="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Staff ID / Badge</label>
+                            <input type="text" name="staff_id" placeholder="EMP-2026-0001" class="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Staff ID / Code</label>
-                        <input type="text" name="staff_id" placeholder="EMP-2026-0001" class="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Corporate Email</label>
+                            <input type="email" name="email" required class="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Phone Number</label>
+                            <input type="text" name="phone" placeholder="+60123456789" class="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Department</label>
+                            <input type="text" name="department" placeholder="Engineering, HR..." class="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Job Title</label>
+                            <input type="text" name="job_title" placeholder="Lead Architect..." class="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Master Persona</label>
+                            <select name="role" required class="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
+                                <option value="employee">Employee</option>
+                                <option value="hr_manager">HR Manager</option>
+                                <option value="payroll_officer">Payroll Officer</option>
+                                <option value="finance_officer">Finance Officer</option>
+                                <option value="superadmin">Super Administrator</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Initial Password</label>
+                            <input type="password" name="password" required class="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Email Address</label>
-                        <input type="email" name="email" required class="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Phone Number</label>
-                        <input type="text" name="phone" placeholder="+60123456789" class="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
-                    </div>
-                </div>
+                <!-- Sub-System Clearance Controls -->
+                <div class="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-800">
+                    <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">2. Sub-System Access Permissions</div>
+                    
+                    <div class="space-y-2.5">
+                        <!-- HRMS Clearance -->
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                            <div class="flex items-center space-x-2.5">
+                                <input type="checkbox" name="hrms_access" value="1" checked id="hrms_access" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                                <label for="hrms_access" class="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                                    HRMS Module (:8001)
+                                </label>
+                            </div>
+                            <select name="hrms_role" class="px-2 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] text-slate-700 dark:text-slate-300">
+                                <option value="">Default (Auto)</option>
+                                <option value="Super Admin">Super Admin</option>
+                                <option value="HR Administrator">HR Administrator</option>
+                                <option value="Department Manager">Department Manager</option>
+                                <option value="Employee">Employee</option>
+                            </select>
+                        </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Department</label>
-                        <input type="text" name="department" placeholder="Engineering, HR..." class="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Job Title</label>
-                        <input type="text" name="job_title" placeholder="Lead Architect..." class="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
-                    </div>
-                </div>
+                        <!-- Payroll Clearance -->
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                            <div class="flex items-center space-x-2.5">
+                                <input type="checkbox" name="payroll_access" value="1" checked id="payroll_access" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                                <label for="payroll_access" class="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                                    Payroll Suite (:8002)
+                                </label>
+                            </div>
+                            <select name="payroll_role" class="px-2 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] text-slate-700 dark:text-slate-300">
+                                <option value="">Default (Auto)</option>
+                                <option value="super_admin">Super Admin</option>
+                                <option value="payroll_officer">Payroll Officer</option>
+                                <option value="finance_director">Finance Director</option>
+                                <option value="auditor">Auditor (View Only)</option>
+                            </select>
+                        </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Role Designation</label>
-                        <select name="role" required class="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
-                            <option value="employee">Employee</option>
-                            <option value="hr_manager">HR Manager</option>
-                            <option value="payroll_officer">Payroll Officer</option>
-                            <option value="finance_officer">Finance Officer</option>
-                            <option value="superadmin">Super Administrator</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Initial Password</label>
-                        <input type="password" name="password" required class="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
+                        <!-- Clinic Invoicing Clearance -->
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                            <div class="flex items-center space-x-2.5">
+                                <input type="checkbox" name="clinic_access" value="1" checked id="clinic_access" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                                <label for="clinic_access" class="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                                    Clinic Invoicing (:8003)
+                                </label>
+                            </div>
+                            <select name="clinic_role" class="px-2 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] text-slate-700 dark:text-slate-300">
+                                <option value="">Default (Auto)</option>
+                                <option value="admin">Admin (Doctor / Lead)</option>
+                                <option value="receptionist">Receptionist / Frontdesk</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 

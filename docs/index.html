@@ -757,6 +757,11 @@ Content-Type: application/json
         "payroll": "${client.user.role === 'superadmin' ? 'super_admin' : (client.user.role === 'payroll_officer' ? 'payroll_officer' : 'auditor')}",
         "clinic": "${client.user.role === 'superadmin' ? 'admin' : 'receptionist'}"
       },
+      "access_control": {
+        "hrms": { "allowed": true, "role": "${client.user.role === 'superadmin' ? 'Super Admin' : 'Employee'}", "permissions": ["hrms:admin"] },
+        "payroll": { "allowed": true, "role": "${client.user.role === 'superadmin' ? 'super_admin' : 'auditor'}", "permissions": ["payroll:view"] },
+        "clinic": { "allowed": true, "role": "${client.user.role === 'superadmin' ? 'admin' : 'receptionist'}", "permissions": ["invoice:view"] }
+      },
       "permissions": [
         "${client.scopes.split(' ')[0]}",
         "${client.scopes.split(' ')[1] || 'read'}"

@@ -58,6 +58,39 @@ class CentraFlowAuthAndScopeTest extends TestCase
         $this->assertContains('hrms:admin', $response->json('data.permissions'));
         $this->assertContains('payroll:admin', $response->json('data.permissions'));
         $this->assertContains('invoice:admin', $response->json('data.permissions'));
+
+        // Verify access_control matrix
+        $this->assertTrue($response->json('data.access_control.hrms.allowed'));
+        $this->assertEquals('Super Admin', $response->json('data.access_control.hrms.role'));
+        $this->assertTrue($response->json('data.access_control.payroll.allowed'));
+        $this->assertEquals('super_admin', $response->json('data.access_control.payroll.role'));
+        $this->assertTrue($response->json('data.access_control.clinic.allowed'));
+        $this->assertEquals('admin', $response->json('data.access_control.clinic.role'));
+    }
+
+    public function test_user_with_restricted_subsystem_access_is_reflected_in_access_control(): void
+    {
+        $user = User::create([
+            'name' => 'HR Only Employee',
+            'email' => 'hronly.' . uniqid() . '@centraflow.local',
+            'password' => 'password123',
+            'role' => 'hr_manager',
+            'hrms_access' => true,
+            'payroll_access' => false,
+            'clinic_access' => false,
+        ]);
+
+        Passport::actingAs($user, ['hrms:read']);
+
+        $response = $this->getJson('/api/v1/me');
+        $response->assertStatus(200);
+
+        $this->assertTrue($response->json('data.access_control.hrms.allowed'));
+        $this->assertEquals('HR Administrator', $response->json('data.access_control.hrms.role'));
+        $this->assertFalse($response->json('data.access_control.payroll.allowed'));
+        $this->assertNull($response->json('data.access_control.payroll.role'));
+        $this->assertFalse($response->json('data.access_control.clinic.allowed'));
+        $this->assertNull($response->json('data.access_control.clinic.role'));
     }
 
     public function test_scope_enforcement_allows_authorized_scope(): void

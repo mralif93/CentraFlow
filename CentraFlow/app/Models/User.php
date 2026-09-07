@@ -28,6 +28,12 @@ class User extends Authenticatable implements OAuthenticatable
         'department',
         'job_title',
         'status',
+        'hrms_access',
+        'hrms_role',
+        'payroll_access',
+        'payroll_role',
+        'clinic_access',
+        'clinic_role',
     ];
 
     protected static function booted(): void
@@ -86,11 +92,24 @@ class User extends Authenticatable implements OAuthenticatable
     ];
 
     /**
-     * Sub-system specific role mappings.
+     * Sub-system specific role mappings (with per-user override support).
      */
     public function getSubsystemRole(string $system): string
     {
-        return match (strtolower($system)) {
+        $sys = strtolower($system);
+
+        // Check if custom override is set
+        if ($sys === 'hrms' && !empty($this->hrms_role)) {
+            return $this->hrms_role;
+        }
+        if ($sys === 'payroll' && !empty($this->payroll_role)) {
+            return $this->payroll_role;
+        }
+        if (in_array($sys, ['clinic', 'invoicing', 'cis'], true) && !empty($this->clinic_role)) {
+            return $this->clinic_role;
+        }
+
+        return match ($sys) {
             'hrms' => match ($this->role) {
                 'superadmin' => 'Super Admin',
                 'hr_manager' => 'HR Administrator',
@@ -119,6 +138,56 @@ class User extends Authenticatable implements OAuthenticatable
     }
 
     /**
+     * Get subsystem-specific filtered permissions.
+     */
+    public function getSubsystemPermissions(string $system): array
+    {
+        $allPermissions = $this->getPermissions();
+        $prefix = match (strtolower($system)) {
+            'hrms' => 'hrms:',
+            'payroll' => 'payroll:',
+            'clinic', 'invoicing', 'cis' => 'invoice:',
+            default => '',
+        };
+
+        if (empty($prefix)) {
+            return $allPermissions;
+        }
+
+        return array_values(array_filter($allPermissions, fn ($p) => str_starts_with($p, $prefix)));
+    }
+
+    /**
+     * Determine comprehensive access control matrix across all sub-systems.
+     */
+    public function getSubsystemAccess(): array
+    {
+        $isActive = empty($this->status) || ($this->status === 'active');
+
+        $hrmsAllowed = $isActive && (bool) ($this->hrms_access ?? true);
+        $payrollAllowed = $isActive && (bool) ($this->payroll_access ?? true);
+        $clinicAllowed = $isActive && (bool) ($this->clinic_access ?? true);
+
+        return [
+            'hrms' => [
+                'allowed' => $hrmsAllowed,
+                'role' => $hrmsAllowed ? $this->getSubsystemRole('hrms') : null,
+                'permissions' => $hrmsAllowed ? $this->getSubsystemPermissions('hrms') : [],
+            ],
+            'payroll' => [
+                'allowed' => $payrollAllowed,
+                'role' => $payrollAllowed ? $this->getSubsystemRole('payroll') : null,
+                'permissions' => $payrollAllowed ? $this->getSubsystemPermissions('payroll') : [],
+            ],
+            'clinic' => [
+                'allowed' => $clinicAllowed,
+                'role' => $clinicAllowed ? $this->getSubsystemRole('clinic') : null,
+                'permissions' => $clinicAllowed ? $this->getSubsystemPermissions('clinic') : [],
+            ],
+        ];
+    }
+
+    /**
      * Check if user has a specific permission.
      */
     public function hasPermission(string $permission): bool
@@ -140,6 +209,9 @@ class User extends Authenticatable implements OAuthenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'hrms_access' => 'boolean',
+            'payroll_access' => 'boolean',
+            'clinic_access' => 'boolean',
         ];
     }
 }

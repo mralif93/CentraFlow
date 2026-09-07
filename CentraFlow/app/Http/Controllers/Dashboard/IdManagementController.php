@@ -142,6 +142,12 @@ class IdManagementController extends Controller
             'department' => ['nullable', 'string', 'max:100'],
             'job_title' => ['nullable', 'string', 'max:100'],
             'status' => ['nullable', 'string', 'in:active,suspended,resigned'],
+            'hrms_access' => ['nullable', 'boolean'],
+            'hrms_role' => ['nullable', 'string', 'max:50'],
+            'payroll_access' => ['nullable', 'boolean'],
+            'payroll_role' => ['nullable', 'string', 'max:50'],
+            'clinic_access' => ['nullable', 'boolean'],
+            'clinic_role' => ['nullable', 'string', 'max:50'],
         ]);
 
         User::create([
@@ -154,9 +160,15 @@ class IdManagementController extends Controller
             'department' => $validated['department'] ?? null,
             'job_title' => $validated['job_title'] ?? null,
             'status' => $validated['status'] ?? 'active',
+            'hrms_access' => $request->boolean('hrms_access', true),
+            'hrms_role' => $validated['hrms_role'] ?? null,
+            'payroll_access' => $request->boolean('payroll_access', true),
+            'payroll_role' => $validated['payroll_role'] ?? null,
+            'clinic_access' => $request->boolean('clinic_access', true),
+            'clinic_role' => $validated['clinic_role'] ?? null,
         ]);
 
-        return back()->with('success', "Identity '{$validated['name']}' created successfully.");
+        return back()->with('success', "Master Staff Identity '{$validated['name']}' created successfully.");
     }
 
     /**
@@ -172,11 +184,21 @@ class IdManagementController extends Controller
             'department' => ['nullable', 'string', 'max:100'],
             'job_title' => ['nullable', 'string', 'max:100'],
             'status' => ['nullable', 'string', 'in:active,suspended,resigned'],
+            'hrms_access' => ['nullable', 'boolean'],
+            'hrms_role' => ['nullable', 'string', 'max:50'],
+            'payroll_access' => ['nullable', 'boolean'],
+            'payroll_role' => ['nullable', 'string', 'max:50'],
+            'clinic_access' => ['nullable', 'boolean'],
+            'clinic_role' => ['nullable', 'string', 'max:50'],
         ]);
+
+        $validated['hrms_access'] = $request->boolean('hrms_access');
+        $validated['payroll_access'] = $request->boolean('payroll_access');
+        $validated['clinic_access'] = $request->boolean('clinic_access');
 
         $user->update($validated);
 
-        return back()->with('success', "User '{$user->name}' updated successfully.");
+        return back()->with('success', "Staff Identity '{$user->name}' updated successfully.");
     }
 
     /**
