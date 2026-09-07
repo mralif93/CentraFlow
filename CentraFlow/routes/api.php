@@ -15,9 +15,11 @@ Route::prefix('v1')->group(function () {
                 'staff_id' => $user->staff_id,
                 'employee_code' => $user->staff_id,
                 'phone' => $user->phone,
+                'phone_number' => $user->phone,
                 'role' => $user->role,
                 'department' => $user->department,
                 'job_title' => $user->job_title,
+                'designation' => $user->job_title,
                 'status' => $user->status,
                 'permissions' => $user->getPermissions(),
                 'subsystem_roles' => [
