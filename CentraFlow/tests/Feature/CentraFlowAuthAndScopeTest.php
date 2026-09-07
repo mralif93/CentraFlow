@@ -47,8 +47,17 @@ class CentraFlowAuthAndScopeTest extends TestCase
                     'uuid' => $user->uuid,
                     'email' => $user->email,
                     'role' => $user->role,
+                    'subsystem_roles' => [
+                        'hrms' => 'Super Admin',
+                        'payroll' => 'super_admin',
+                        'clinic' => 'admin',
+                    ],
                 ],
             ]);
+        $this->assertIsArray($response->json('data.permissions'));
+        $this->assertContains('hrms:admin', $response->json('data.permissions'));
+        $this->assertContains('payroll:admin', $response->json('data.permissions'));
+        $this->assertContains('invoice:admin', $response->json('data.permissions'));
     }
 
     public function test_scope_enforcement_allows_authorized_scope(): void

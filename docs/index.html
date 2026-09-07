@@ -744,21 +744,31 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "status": "success",
-  "data": {
-    "uuid": "${client.user.uuid}",
-    "name": "${client.user.name}",
-    "email": "${client.user.email}",
-    "role": "${client.user.role}",
-    "staff_id": "${client.user.staff_id}",
-    "department": "${client.user.department}",
-    "scopes": [
-      ${client.scopes.split(' ').map(s => `"${s}"`).join(', ')}
-    ]
+    "status": "success",
+    "data": {
+      "uuid": "${client.user.uuid}",
+      "name": "${client.user.name}",
+      "email": "${client.user.email}",
+      "staff_id": "${client.user.staff_id}",
+      "employee_code": "${client.user.staff_id}",
+      "role": "${client.user.role}",
+      "subsystem_roles": {
+        "hrms": "${client.user.role === 'superadmin' ? 'Super Admin' : (client.user.role === 'hr_manager' ? 'HR Administrator' : 'Employee')}",
+        "payroll": "${client.user.role === 'superadmin' ? 'super_admin' : (client.user.role === 'payroll_officer' ? 'payroll_officer' : 'auditor')}",
+        "clinic": "${client.user.role === 'superadmin' ? 'admin' : 'receptionist'}"
+      },
+      "permissions": [
+        "${client.scopes.split(' ')[0]}",
+        "${client.scopes.split(' ')[1] || 'read'}"
+      ],
+      "department": "${client.user.department}",
+      "scopes": [
+        ${client.scopes.split(' ').map(s => `"${s}"`).join(', ')}
+      ]
+    }
   }
-}
 
-// User successfully authenticated in ${client.name}!`;
+  // Access control & permissions verified in ${client.name}!`;
             }
         }
 

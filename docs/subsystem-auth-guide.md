@@ -179,29 +179,40 @@ class CentraFlowSsoClientController extends Controller
 
         $profile = $userResponse->json('data');
 
-        // 4. Find or provision user in local sub-system database
+        // 4. Resolve sub-system specific role and permission sets
+        // CentraFlow provides pre-computed 'subsystem_roles' and enterprise 'permissions'
+        $subsystemName = config('app.name'); // or 'hrms' / 'payroll' / 'clinic'
+        $assignedRole = $profile['subsystem_roles']['hrms'] ?? ($profile['role'] ?? 'employee');
+
+        // Find or provision user in local sub-system database
         $user = User::updateOrCreate(
             ['email' => $profile['email']],
             [
-                'name'     => $profile['name'],
+                'name'          => $profile['name'],
+                'role'          => $assignedRole,
+                'department'    => $profile['department'] ?? null,
+                'job_title'     => $profile['job_title'] ?? null,
+                'employee_code' => $profile['employee_code'] ?? ($profile['staff_id'] ?? null),
+                'phone'         => $profile['phone'] ?? null,
                 // Set unguessable password since auth is handled by CentraFlow
-                'password' => bcrypt(Str::random(32)),
+                'password'      => bcrypt(Str::random(32)),
             ]
         );
 
-        // Optional: Save CentraFlow UUID or role if column exists
+        // Optional: Save CentraFlow UUID if column exists
         if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'centraflow_uuid')) {
             $user->centraflow_uuid = $profile['uuid'];
             $user->save();
         }
 
         // 5. Authenticate user into local session
-        Auth::login($user, true);
+        Auth::login($user, false);
 
-        // Store token in session if sub-system needs to call CentraFlow APIs
+        // Store access token and granular permissions in session
         $request->session()->put('centraflow_access_token', $accessToken);
+        $request->session()->put('centraflow_permissions', $profile['permissions'] ?? []);
 
-        return redirect()->intended('/home');
+        return redirect()->intended('/dashboard');
     }
 }
 ```

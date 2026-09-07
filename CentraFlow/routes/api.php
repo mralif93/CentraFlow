@@ -19,6 +19,12 @@ Route::prefix('v1')->group(function () {
                 'department' => $user->department,
                 'job_title' => $user->job_title,
                 'status' => $user->status,
+                'permissions' => $user->getPermissions(),
+                'subsystem_roles' => [
+                    'hrms' => $user->getSubsystemRole('hrms'),
+                    'payroll' => $user->getSubsystemRole('payroll'),
+                    'clinic' => $user->getSubsystemRole('clinic'),
+                ],
                 'scopes' => $request->user()->token()?->scopes ?? [],
             ],
         ]);
