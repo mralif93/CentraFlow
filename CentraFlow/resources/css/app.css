@@ -1,0 +1,43 @@
+@import 'tailwindcss';
+@import 'animate.css';
+@import 'boxicons/css/boxicons.min.css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    --color-brand-50: #EEF2FF;
+    --color-brand-100: #E0E7FF;
+    --color-brand-200: #C7D2FE;
+    --color-brand-300: #A5B4FC;
+    --color-brand-400: #818CF8;
+    --color-brand-500: #6366F1;
+    --color-brand-600: #4F46E5;
+    --color-brand-700: #4338CA;
+    --color-brand-800: #3730A3;
+    --color-brand-900: #312E81;
+    --color-brand-950: #1E1B4B;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+/* Glow Radial Utility from reference standard */
+.glow-radial {
+    background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.18) 0%, rgba(30, 27, 75, 0.04) 50%, transparent 80%);
+}
+
+.dark .glow-radial {
+    background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.22) 0%, rgba(15, 23, 42, 0.05) 50%, transparent 80%);
+}
+
+.glass-panel {
+    backdrop-filter: blur(12px);
+}
