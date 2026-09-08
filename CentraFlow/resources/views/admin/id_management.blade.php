@@ -2,14 +2,20 @@
 
 @section('title', 'Identities & Session Control — CentraFlow Admin')
 
+@push('styles')
+<style>
+    [x-cloak] { display: none !important; }
+</style>
+@endpush
+
 @section('content')
-<div x-data="{ 
+<div x-cloak x-data="{ 
     tab: 'identities', 
     showCreateModal: false,
     showEditModal: false,
     showDetailModal: false,
-    selectedUser: null,
-    selectedAccess: null,
+    selectedUser: {},
+    selectedAccess: { hrms: {}, payroll: {}, clinic: {} },
     editForm: {
         id: '',
         name: '',
@@ -30,22 +36,22 @@
     },
     openEdit(user, access) {
         this.selectedUser = user;
-        this.selectedAccess = access;
+        this.selectedAccess = access || { hrms: {}, payroll: {}, clinic: {} };
         this.editForm = {
             id: user.id,
-            name: user.name,
-            email: user.email,
+            name: user.name || '',
+            email: user.email || '',
             staff_id: user.staff_id || '',
             phone: user.phone || '',
             department: user.department || '',
             job_title: user.job_title || user.designation || '',
             role: user.role || 'employee',
             status: user.status || 'active',
-            hrms_access: access.hrms.allowed,
+            hrms_access: access && access.hrms ? access.hrms.allowed : true,
             hrms_role: user.hrms_role || '',
-            payroll_access: access.payroll.allowed,
+            payroll_access: access && access.payroll ? access.payroll.allowed : true,
             payroll_role: user.payroll_role || '',
-            clinic_access: access.clinic.allowed,
+            clinic_access: access && access.clinic ? access.clinic.allowed : true,
             clinic_role: user.clinic_role || '',
             updateUrl: '/admin/id-management/users/' + user.id
         };
@@ -53,7 +59,7 @@
     },
     openDetail(user, access) {
         this.selectedUser = user;
-        this.selectedAccess = access;
+        this.selectedAccess = access || { hrms: {}, payroll: {}, clinic: {} };
         this.showDetailModal = true;
     }
 }" class="space-y-8 animate__animated animate__fadeIn">
@@ -86,7 +92,7 @@
                 variant="primary" 
                 size="md" 
                 icon="bx bx-plus"
-                class="shadow-md shadow-indigo-600/30"
+                class="shadow-md shadow-indigo-600/30 cursor-pointer"
             >
                 Create Master Identity
             </x-button>
@@ -131,17 +137,17 @@
 
     <!-- Navigation Tabs -->
     <div class="border-b border-slate-200 dark:border-slate-800 flex space-x-8 text-sm">
-        <button @click="tab = 'identities'" :class="tab === 'identities' ? 'text-indigo-600 dark:text-indigo-400 border-indigo-600 dark:border-indigo-400 border-b-2 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300'" class="pb-3 transition-colors flex items-center space-x-2 cursor-pointer">
+        <button type="button" @click="tab = 'identities'" :class="tab === 'identities' ? 'text-indigo-600 dark:text-indigo-400 border-indigo-600 dark:border-indigo-400 border-b-2 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300'" class="pb-3 transition-colors flex items-center space-x-2 cursor-pointer">
             <i class="bx bx-user-pin text-base"></i>
             <span>Master Identities</span>
             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">{{ $users->total() }}</span>
         </button>
-        <button @click="tab = 'sessions'" :class="tab === 'sessions' ? 'text-indigo-600 dark:text-indigo-400 border-indigo-600 dark:border-indigo-400 border-b-2 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300'" class="pb-3 transition-colors flex items-center space-x-2 cursor-pointer">
+        <button type="button" @click="tab = 'sessions'" :class="tab === 'sessions' ? 'text-indigo-600 dark:text-indigo-400 border-indigo-600 dark:border-indigo-400 border-b-2 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300'" class="pb-3 transition-colors flex items-center space-x-2 cursor-pointer">
             <i class="bx bx-laptop text-base"></i>
             <span>Active Web Sessions</span>
             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">{{ $activeSessions->count() }}</span>
         </button>
-        <button @click="tab = 'tokens'" :class="tab === 'tokens' ? 'text-indigo-600 dark:text-indigo-400 border-indigo-600 dark:border-indigo-400 border-b-2 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300'" class="pb-3 transition-colors flex items-center space-x-2 cursor-pointer">
+        <button type="button" @click="tab = 'tokens'" :class="tab === 'tokens' ? 'text-indigo-600 dark:text-indigo-400 border-indigo-600 dark:border-indigo-400 border-b-2 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300'" class="pb-3 transition-colors flex items-center space-x-2 cursor-pointer">
             <i class="bx bx-shield-quarter text-base"></i>
             <span>Issued OAuth Grants</span>
             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">{{ $oauthTokens->count() }}</span>
@@ -258,7 +264,7 @@
 
                                 <!-- Delete Identity -->
                                 @if ($user->id !== auth()->id())
-                                    <form method="POST" action="{{ route('admin.id-management.destroy-user', $user->id) }}" class="inline" onsubmit="return confirm('Delete this master identity?')">
+                                    <form method="POST" action="{{ route('admin.id-management.destroy-user', $user->id) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete master identity \'{{ $user->name }}\'?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" title="Delete User" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-slate-800 transition cursor-pointer">
@@ -285,7 +291,7 @@
     </div>
 
     <!-- Tab 2: Active Web Sessions -->
-    <div x-show="tab === 'sessions'" class="glass-panel bg-white/80 dark:bg-slate-900/75 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs" style="display: none;">
+    <div x-show="tab === 'sessions'" class="glass-panel bg-white/80 dark:bg-slate-900/75 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs min-w-[700px]">
                 <thead class="bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
@@ -323,7 +329,7 @@
                             <td class="p-3.5 whitespace-nowrap text-right">
                                 <form method="POST" action="{{ route('admin.id-management.revoke-session', $s->session_id) }}">
                                     @csrf
-                                    <button type="submit" class="px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 font-bold text-[10px] transition">
+                                    <button type="submit" class="px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 font-bold text-[10px] transition cursor-pointer">
                                         Kill Session
                                     </button>
                                 </form>
@@ -342,7 +348,7 @@
     </div>
 
     <!-- Tab 3: Issued OAuth Grants -->
-    <div x-show="tab === 'tokens'" class="glass-panel bg-white/80 dark:bg-slate-900/75 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs" style="display: none;">
+    <div x-show="tab === 'tokens'" class="glass-panel bg-white/80 dark:bg-slate-900/75 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs min-w-[700px]">
                 <thead class="bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
@@ -384,7 +390,7 @@
                             <td class="p-3.5 whitespace-nowrap text-right">
                                 <form method="POST" action="{{ route('admin.id-management.revoke-oauth-token', $t->id) }}">
                                     @csrf
-                                    <button type="submit" class="px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 font-bold text-[10px] transition">
+                                    <button type="submit" class="px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 font-bold text-[10px] transition cursor-pointer">
                                         Revoke Token
                                     </button>
                                 </form>
@@ -403,7 +409,7 @@
     </div>
 
     <!-- ================= MODAL: CREATE MASTER IDENTITY ================= -->
-    <div x-show="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs" style="display: none;">
+    <div x-show="showCreateModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
         <div @click.away="showCreateModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-xl shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                 <div class="flex items-center gap-2.5">
@@ -415,7 +421,7 @@
                         <p class="text-[11px] text-slate-400">Provision unified identity &amp; microservice clearance.</p>
                     </div>
                 </div>
-                <button type="button" @click="showCreateModal = false" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                <button type="button" @click="showCreateModal = false" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
                     <i class="bx bx-x text-xl"></i>
                 </button>
             </div>
@@ -545,7 +551,7 @@
     </div>
 
     <!-- ================= MODAL: EDIT MASTER IDENTITY ================= -->
-    <div x-show="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs" style="display: none;">
+    <div x-show="showEditModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
         <div @click.away="showEditModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-xl shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                 <div class="flex items-center gap-2.5">
@@ -554,10 +560,10 @@
                     </div>
                     <div>
                         <h3 class="text-sm font-black text-slate-900 dark:text-white">Edit Master Staff Identity</h3>
-                        <p class="text-[11px] text-slate-400" x-text="editForm.email"></p>
+                        <p class="text-[11px] text-slate-400 font-mono" x-text="editForm.email"></p>
                     </div>
                 </div>
-                <button type="button" @click="showEditModal = false" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                <button type="button" @click="showEditModal = false" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
                     <i class="bx bx-x text-xl"></i>
                 </button>
             </div>
@@ -686,7 +692,7 @@
     </div>
 
     <!-- ================= MODAL: VIEW MASTER IDENTITY PROFILE ================= -->
-    <div x-show="showDetailModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs" style="display: none;">
+    <div x-show="showDetailModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
         <div @click.away="showDetailModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-lg shadow-2xl space-y-5">
             <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                 <div class="flex items-center gap-2.5">
@@ -694,11 +700,11 @@
                         <i class="bx bx-user-pin"></i>
                     </div>
                     <div>
-                        <h3 class="text-sm font-black text-slate-900 dark:text-white" x-text="selectedUser?.name"></h3>
-                        <p class="text-[11px] text-slate-400 font-mono" x-text="selectedUser?.email"></p>
+                        <h3 class="text-sm font-black text-slate-900 dark:text-white" x-text="selectedUser.name"></h3>
+                        <p class="text-[11px] text-slate-400 font-mono" x-text="selectedUser.email"></p>
                     </div>
                 </div>
-                <button type="button" @click="showDetailModal = false" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                <button type="button" @click="showDetailModal = false" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
                     <i class="bx bx-x text-xl"></i>
                 </button>
             </div>
@@ -707,19 +713,19 @@
                 <div class="grid grid-cols-2 gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800/80">
                     <div>
                         <span class="text-slate-400 text-[10px] block font-bold uppercase">Staff Identifier</span>
-                        <span class="font-mono font-bold text-slate-800 dark:text-slate-200" x-text="selectedUser?.staff_id || 'Not Assigned'"></span>
+                        <span class="font-mono font-bold text-slate-800 dark:text-slate-200" x-text="selectedUser.staff_id || 'Not Assigned'"></span>
                     </div>
                     <div>
                         <span class="text-slate-400 text-[10px] block font-bold uppercase">Phone Contact</span>
-                        <span class="text-slate-800 dark:text-slate-200" x-text="selectedUser?.phone || '—'"></span>
+                        <span class="text-slate-800 dark:text-slate-200" x-text="selectedUser.phone || '—'"></span>
                     </div>
                     <div>
                         <span class="text-slate-400 text-[10px] block font-bold uppercase">Department</span>
-                        <span class="text-slate-800 dark:text-slate-200" x-text="selectedUser?.department || 'General'"></span>
+                        <span class="text-slate-800 dark:text-slate-200" x-text="selectedUser.department || 'General'"></span>
                     </div>
                     <div>
                         <span class="text-slate-400 text-[10px] block font-bold uppercase">Designation / Title</span>
-                        <span class="text-slate-800 dark:text-slate-200" x-text="selectedUser?.job_title || selectedUser?.designation || 'Staff'"></span>
+                        <span class="text-slate-800 dark:text-slate-200" x-text="selectedUser.job_title || selectedUser.designation || 'Staff'"></span>
                     </div>
                 </div>
 
@@ -729,22 +735,22 @@
                         <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/30">
                             <span class="font-bold text-slate-700 dark:text-slate-300">HRMS Portal (:8001)</span>
                             <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold" 
-                                :class="selectedAccess?.hrms?.allowed ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'" 
-                                x-text="selectedAccess?.hrms?.allowed ? (selectedAccess?.hrms?.role || 'Allowed') : 'Access Denied'">
+                                :class="selectedAccess && selectedAccess.hrms && selectedAccess.hrms.allowed ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'" 
+                                x-text="selectedAccess && selectedAccess.hrms && selectedAccess.hrms.allowed ? (selectedAccess.hrms.role || 'Allowed') : 'Access Denied'">
                             </span>
                         </div>
                         <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/30">
                             <span class="font-bold text-slate-700 dark:text-slate-300">Payroll Suite (:8002)</span>
                             <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold" 
-                                :class="selectedAccess?.payroll?.allowed ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'" 
-                                x-text="selectedAccess?.payroll?.allowed ? (selectedAccess?.payroll?.role || 'Allowed') : 'Access Denied'">
+                                :class="selectedAccess && selectedAccess.payroll && selectedAccess.payroll.allowed ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'" 
+                                x-text="selectedAccess && selectedAccess.payroll && selectedAccess.payroll.allowed ? (selectedAccess.payroll.role || 'Allowed') : 'Access Denied'">
                             </span>
                         </div>
                         <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/30">
                             <span class="font-bold text-slate-700 dark:text-slate-300">Clinic Invoicing (:8003)</span>
                             <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold" 
-                                :class="selectedAccess?.clinic?.allowed ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'" 
-                                x-text="selectedAccess?.clinic?.allowed ? (selectedAccess?.clinic?.role || 'Allowed') : 'Access Denied'">
+                                :class="selectedAccess && selectedAccess.clinic && selectedAccess.clinic.allowed ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'" 
+                                x-text="selectedAccess && selectedAccess.clinic && selectedAccess.clinic.allowed ? (selectedAccess.clinic.role || 'Allowed') : 'Access Denied'">
                             </span>
                         </div>
                     </div>

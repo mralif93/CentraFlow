@@ -17,6 +17,7 @@
         "@laravel/multiplex": "^0.4.1"
     },
     "dependencies": {
+        "alpinejs": "^3.17.2",
         "animate.css": "^4.1.1",
         "boxicons": "^2.1.4"
     }
