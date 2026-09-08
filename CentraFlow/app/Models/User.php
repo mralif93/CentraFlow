@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 use Laravel\Passport\Contracts\OAuthenticatable;
 use Laravel\Passport\HasApiTokens;
@@ -27,6 +28,11 @@ class User extends Authenticatable implements OAuthenticatable
         'role',
         'department',
         'job_title',
+        'designation',
+        'employee_code',
+        'avatar',
+        'last_login_at',
+        'last_login_ip',
         'status',
         'hrms_access',
         'hrms_role',
@@ -213,5 +219,38 @@ class User extends Authenticatable implements OAuthenticatable
             'payroll_access' => 'boolean',
             'clinic_access' => 'boolean',
         ];
+    }
+
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'user_roles');
+    }
+
+    public function hasRole(string|array $roles): bool
+    {
+        if (is_string($roles)) {
+            $roles = [$roles];
+        }
+
+        if ($this->exists && $this->roles()->exists()) {
+            return $this->roles()->whereIn('name', $roles)->exists();
+        }
+
+        return in_array($this->role, $roles, true);
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'superadmin' || $this->hasRole(['superadmin', 'super_admin', 'Super Admin']);
+    }
+
+    public function getEmployeeCodeAttribute(): ?string
+    {
+        return $this->attributes['employee_code'] ?? $this->attributes['staff_id'] ?? null;
+    }
+
+    public function getDesignationAttribute(): ?string
+    {
+        return $this->attributes['designation'] ?? $this->attributes['job_title'] ?? null;
     }
 }
