@@ -85,21 +85,21 @@
             <div>
                 <p class="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">External Portals</p>
                 <div class="space-y-1">
-                    <a href="http://localhost:8001/auth/centraflow" target="_blank" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-blue-600 dark:hover:text-blue-400 transition-all">
+                    <a href="http://localhost:8001/login" target="_blank" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-blue-600 dark:hover:text-blue-400 transition-all">
                         <div class="flex items-center gap-3">
                             <i class="bx bx-user-pin text-lg text-blue-500"></i>
                             <span>HRMS (:8001)</span>
                         </div>
                         <i class="bx bx-link-external text-xs text-slate-400"></i>
                     </a>
-                    <a href="http://localhost:8002/auth/centraflow" target="_blank" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all">
+                    <a href="http://localhost:8002/login" target="_blank" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all">
                         <div class="flex items-center gap-3">
                             <i class="bx bx-wallet text-lg text-emerald-500"></i>
                             <span>Payroll (:8002)</span>
                         </div>
                         <i class="bx bx-link-external text-xs text-slate-400"></i>
                     </a>
-                    <a href="http://localhost:8003/auth/centraflow" target="_blank" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-purple-600 dark:hover:text-purple-400 transition-all">
+                    <a href="http://localhost:8003/login" target="_blank" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-purple-600 dark:hover:text-purple-400 transition-all">
                         <div class="flex items-center gap-3">
                             <i class="bx bx-receipt text-lg text-purple-500"></i>
                             <span>Invoicing (:8003)</span>

@@ -46,7 +46,7 @@
                     </div>
                 </div>
             </div>
-            <a href="http://localhost:8001/auth/centraflow" target="_blank" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 font-semibold text-white text-sm shadow-md shadow-blue-600/25 transition-all">
+            <a href="http://localhost:8001/login" target="_blank" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 font-semibold text-white text-sm shadow-md shadow-blue-600/25 transition-all">
                 <span>Launch HRMS Portal</span>
                 <i class="bx bx-link-external text-base"></i>
             </a>
@@ -76,7 +76,7 @@
                     </div>
                 </div>
             </div>
-            <a href="http://localhost:8002/auth/centraflow" target="_blank" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold text-white text-sm shadow-md shadow-emerald-600/25 transition-all">
+            <a href="http://localhost:8002/login" target="_blank" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold text-white text-sm shadow-md shadow-emerald-600/25 transition-all">
                 <span>Launch Payroll Portal</span>
                 <i class="bx bx-link-external text-base"></i>
             </a>
@@ -106,7 +106,7 @@
                     </div>
                 </div>
             </div>
-            <a href="http://localhost:8003/auth/centraflow" target="_blank" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 font-semibold text-white text-sm shadow-md shadow-purple-600/25 transition-all">
+            <a href="http://localhost:8003/login" target="_blank" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 font-semibold text-white text-sm shadow-md shadow-purple-600/25 transition-all">
                 <span>Launch Invoicing Portal</span>
                 <i class="bx bx-link-external text-base"></i>
             </a>
