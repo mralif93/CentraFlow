@@ -31,7 +31,7 @@
     <!-- Mobile Sidebar Backdrop Overlay -->
     <div id="sidebar-backdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-40 lg:hidden hidden transition-opacity duration-300"></div>
 
-    <!-- SIDEBAR NAVIGATION (HRMS Style) -->
+    <!-- SIDEBAR NAVIGATION (Executive CentraFlow Design) -->
     <aside id="admin-sidebar" class="fixed lg:static inset-y-0 left-0 -translate-x-full lg:translate-x-0 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0 z-40 lg:z-auto transition-transform duration-300 ease-in-out">
         
         <!-- Sidebar Brand Logo & Mobile Close Button -->
@@ -62,6 +62,7 @@
 
         <!-- Sidebar Navigation Menu Links -->
         <div class="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+            <!-- Group 1: Central Governance -->
             <div>
                 <p class="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Central Governance</p>
                 <div class="space-y-1">
@@ -69,74 +70,101 @@
                         href="{{ route('admin.dashboard') }}"
                         class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {{ request()->routeIs('admin.dashboard') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white' }}"
                     >
-                        <i class="bx bxs-dashboard text-lg {{ request()->routeIs('admin.dashboard') ? 'text-white' : 'text-slate-400' }}"></i>
+                        <i class="bx bxs-dashboard text-lg {{ request()->routeIs('admin.dashboard') ? 'text-white' : 'text-indigo-500' }}"></i>
                         <span>System Overview</span>
                     </a>
                     <a
                         href="{{ route('admin.id-management') }}"
                         class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {{ request()->routeIs('admin.id-management*') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white' }}"
                     >
-                        <i class="bx bx-id-card text-lg {{ request()->routeIs('admin.id-management*') ? 'text-white' : 'text-slate-400' }}"></i>
+                        <i class="bx bx-id-card text-lg {{ request()->routeIs('admin.id-management*') ? 'text-white' : 'text-purple-500' }}"></i>
                         <span>Identities &amp; Sessions</span>
                     </a>
                 </div>
             </div>
 
+            <!-- Group 2: Federated Modules & External Portals -->
             <div>
-                <p class="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">External Portals</p>
+                <div class="flex items-center justify-between px-3 mb-2">
+                    <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Federated Modules</p>
+                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">3 Live</span>
+                </div>
                 <div class="space-y-1">
-                    <a href="http://localhost:8001/login" target="_blank" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-blue-600 dark:hover:text-blue-400 transition-all">
+                    <!-- HRMS Module -->
+                    <a href="http://localhost:8001/login" target="_blank" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-blue-600 dark:hover:text-blue-400 transition-all group">
                         <div class="flex items-center gap-3">
-                            <i class="bx bx-user-pin text-lg text-blue-500"></i>
-                            <span>HRMS (:8001)</span>
+                            <div class="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm">
+                                <i class="bx bx-user-pin"></i>
+                            </div>
+                            <div>
+                                <span class="font-bold text-slate-900 dark:text-white block group-hover:text-blue-600">HRMS Portal</span>
+                                <span class="text-[10px] text-slate-400 font-mono">PulseHR (:8001)</span>
+                            </div>
                         </div>
-                        <i class="bx bx-link-external text-xs text-slate-400"></i>
+                        <i class="bx bx-link-external text-xs text-slate-400 group-hover:text-blue-600"></i>
                     </a>
-                    <a href="http://localhost:8002/login" target="_blank" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all">
+
+                    <!-- Payroll Module -->
+                    <a href="http://localhost:8002/login" target="_blank" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all group">
                         <div class="flex items-center gap-3">
-                            <i class="bx bx-wallet text-lg text-emerald-500"></i>
-                            <span>Payroll (:8002)</span>
+                            <div class="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-sm">
+                                <i class="bx bx-wallet"></i>
+                            </div>
+                            <div>
+                                <span class="font-bold text-slate-900 dark:text-white block group-hover:text-emerald-600">Payroll Suite</span>
+                                <span class="text-[10px] text-slate-400 font-mono">PayFlow MY (:8002)</span>
+                            </div>
                         </div>
-                        <i class="bx bx-link-external text-xs text-slate-400"></i>
+                        <i class="bx bx-link-external text-xs text-slate-400 group-hover:text-emerald-600"></i>
                     </a>
-                    <a href="http://localhost:8003/login" target="_blank" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-purple-600 dark:hover:text-purple-400 transition-all">
+
+                    <!-- Invoicing Module -->
+                    <a href="http://localhost:8003/login" target="_blank" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-purple-600 dark:hover:text-purple-400 transition-all group">
                         <div class="flex items-center gap-3">
-                            <i class="bx bx-receipt text-lg text-purple-500"></i>
-                            <span>Invoicing (:8003)</span>
+                            <div class="w-6 h-6 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center text-sm">
+                                <i class="bx bx-receipt"></i>
+                            </div>
+                            <div>
+                                <span class="font-bold text-slate-900 dark:text-white block group-hover:text-purple-600">Clinic Invoicing</span>
+                                <span class="text-[10px] text-slate-400 font-mono">MediBill CIS (:8003)</span>
+                            </div>
                         </div>
-                        <i class="bx bx-link-external text-xs text-slate-400"></i>
+                        <i class="bx bx-link-external text-xs text-slate-400 group-hover:text-purple-600"></i>
                     </a>
                 </div>
             </div>
 
+            <!-- Group 3: Platform Launchpad -->
             <div>
-                <p class="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Launcher</p>
-                <a href="{{ route('home') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all">
-                    <i class="bx bx-home-alt text-lg text-slate-400"></i>
-                    <span>Public Operations View</span>
-                </a>
+                <p class="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Shortcuts</p>
+                <div class="space-y-1">
+                    <a href="{{ route('home') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white transition-all">
+                        <i class="bx bx-grid-alt text-lg text-slate-400"></i>
+                        <span>Public Launchpad</span>
+                    </a>
+                </div>
             </div>
         </div>
 
-        <!-- Sidebar Footer Status -->
-        <div class="p-3 border-t border-slate-100 dark:border-slate-800/80">
-            <div class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60">
-                <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                <div class="min-w-0">
-                    <p class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">Passport Hub Live</p>
-                    <p class="text-[9px] text-slate-400 font-mono truncate">OAuth 2.0 &bull; Redis Online</p>
+        <!-- Sidebar Station Footer -->
+        <div class="p-3 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/30">
+            <div class="flex items-center justify-between px-2 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-[10px] font-bold text-slate-700 dark:text-slate-300">Central Hub Online</span>
                 </div>
+                <span class="text-[9px] font-mono text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">:8004</span>
             </div>
         </div>
     </aside>
 
     <!-- CONTENT WRAPPER -->
     <div class="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        
-        <!-- Header Bar -->
-        <header class="h-16 sm:h-20 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 shrink-0 z-30 transition-colors">
-            
-            <div class="flex items-center gap-3">
+
+        <!-- Top Header Bar (HRMS Style) -->
+        <header class="h-16 sm:h-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-8 flex items-center justify-between shrink-0 z-30">
+            <!-- Left Info / Mobile Toggle -->
+            <div class="flex items-center gap-3 sm:gap-4">
                 <button
                     type="button"
                     onclick="toggleMobileSidebar()"
@@ -151,7 +179,7 @@
                         CentraFlow Platform
                     </h2>
                     <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono hidden sm:inline-block">
-                        Enterprise SSO &bull; Active Sessions &bull; Redis Orchestration
+                        Enterprise Unified Directory &bull; Multi-Portal Orchestration
                     </span>
                 </div>
             </div>
@@ -235,10 +263,10 @@
                 <div class="flex items-center gap-1.5 justify-center sm:justify-start">
                     <span class="font-bold text-slate-600 dark:text-slate-300">CentraFlow Hub Console</span>
                     <span>&bull;</span>
-                    <span class="text-emerald-600 dark:text-emerald-400 font-medium">OAuth 2.0 &bull; Redis Orchestrator</span>
+                    <span class="text-emerald-600 dark:text-emerald-400 font-medium">Enterprise Unified Architecture</span>
                 </div>
                 <div>
-                    <span>Unified Federation: </span>
+                    <span>Federated Systems: </span>
                     <span class="text-indigo-600 dark:text-indigo-400 font-semibold">HRMS &bull; Payroll &bull; Invoicing</span>
                 </div>
             </footer>
