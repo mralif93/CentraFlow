@@ -14,39 +14,61 @@
         badgeVariant="indigo"
     >
         <x-slot:actions>
-            <x-button 
-                href="{{ route('admin.id-management') }}" 
-                variant="primary" 
-                size="md" 
-                icon="bx bx-user-pin"
-                class="shadow-md shadow-indigo-600/30"
-            >
-                Manage Identities
-            </x-button>
+            <div class="flex items-center gap-2">
+                <x-button 
+                    href="{{ route('admin.users.index') }}" 
+                    variant="primary" 
+                    size="md" 
+                    icon="bx bx-user-pin"
+                    class="shadow-md shadow-indigo-600/30"
+                >
+                    Manage Users
+                </x-button>
+                <x-button 
+                    href="{{ route('admin.sessions.index') }}" 
+                    variant="secondary" 
+                    size="md" 
+                    icon="bx bx-broadcast"
+                >
+                    Sessions Control
+                </x-button>
+                <x-button 
+                    href="{{ route('admin.audit-logs.index') }}" 
+                    variant="secondary" 
+                    size="md" 
+                    icon="bx bx-history"
+                >
+                    Audit Trail
+                </x-button>
+            </div>
         </x-slot:actions>
     </x-page-header>
 
     <!-- Top Metric Overview Grid (HRMS Component Standard) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <x-stat-card 
-            title="Master Identities" 
-            :value="$userCount" 
-            icon="bx-group" 
-            color="indigo" 
-            change="Unified Directory"
-            changeType="positive"
-            subtitle="HRMS, Payroll & CIS"
-        />
+        <a href="{{ route('admin.users.index') }}" class="block">
+            <x-stat-card 
+                title="Master Users" 
+                :value="$userCount" 
+                icon="bx-group" 
+                color="indigo" 
+                change="Unified Directory"
+                changeType="positive"
+                subtitle="HRMS, Payroll & CIS"
+            />
+        </a>
 
-        <x-stat-card 
-            title="Active Web Sessions" 
-            :value="$sessionCount" 
-            icon="bx-broadcast" 
-            color="emerald" 
-            change="Online"
-            changeType="positive"
-            subtitle="Database session store"
-        />
+        <a href="{{ route('admin.sessions.index') }}" class="block">
+            <x-stat-card 
+                title="Active Sessions" 
+                :value="$sessionCount" 
+                icon="bx-broadcast" 
+                color="emerald" 
+                change="Online"
+                changeType="positive"
+                subtitle="Database session store"
+            />
+        </a>
 
         <x-stat-card 
             title="Federated Modules" 
@@ -127,6 +149,28 @@
                                 <code class="text-indigo-600 dark:text-indigo-300 bg-indigo-50/50 dark:bg-indigo-950/40 px-2 py-0.5 rounded text-[10px] font-mono border border-indigo-100 dark:border-indigo-800/50">{{ $mod['scope'] }}</code>
                             </div>
                         </div>
+
+                        <!-- Direct Subsystem Admin Shortcuts -->
+                        @if (!empty($mod['shortcuts']))
+                            <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80">
+                                <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">Deep System Shortcuts</p>
+                                <div class="grid grid-cols-1 gap-1.5">
+                                    @foreach ($mod['shortcuts'] as $sc)
+                                        <a 
+                                            href="{{ $sc['url'] }}" 
+                                            target="_blank"
+                                            class="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-[11px] font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all border border-slate-100 dark:border-slate-800 group/sc"
+                                        >
+                                            <span class="flex items-center gap-2 truncate">
+                                                <i class="bx {{ $sc['icon'] }} text-slate-400 group-hover/sc:text-indigo-500"></i>
+                                                <span class="truncate">{{ $sc['label'] }}</span>
+                                            </span>
+                                            <i class="bx bx-right-arrow-alt text-xs text-slate-400 group-hover/sc:translate-x-0.5 transition-transform"></i>
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                     </div>
 
                     <div class="mt-5 pt-3.5 border-t border-slate-100 dark:border-slate-800/80">
@@ -155,10 +199,10 @@
                 <x-slot:header>
                     <div class="flex items-center justify-between w-full">
                         <div>
-                            <h3 class="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">Master Identity Directory</h3>
+                            <h3 class="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">Master Users Directory</h3>
                             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Active enterprise users with unified employee profiles across all modules.</p>
                         </div>
-                        <a href="{{ route('admin.id-management') }}" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 flex items-center gap-1">
+                        <a href="{{ route('admin.users.index') }}" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 flex items-center gap-1">
                             <span>View All ({{ $userCount }})</span>
                             <i class="bx bx-chevron-right"></i>
                         </a>
@@ -214,7 +258,7 @@
                                         </x-badge>
                                     </td>
                                     <td class="py-3.5 px-5 text-right">
-                                        <a href="{{ route('admin.id-management') }}" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline text-xs">Manage</a>
+                                        <a href="{{ route('admin.users.index') }}" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline text-xs">Manage</a>
                                     </td>
                                 </tr>
                             @endforeach
@@ -224,8 +268,39 @@
             </x-card>
         </div>
 
-        <!-- Right 1 Col: OAuth Clients & Platform Mesh Card -->
+        <!-- Right 1 Col: OAuth Clients & Live Audit Feed -->
         <div class="space-y-6">
+            <!-- Recent Security Audit Trail Widget -->
+            @if(isset($recentAuditLogs) && $recentAuditLogs->isNotEmpty())
+                <x-card>
+                    <x-slot:header>
+                        <div class="flex items-center justify-between w-full">
+                            <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="bx bx-history text-indigo-600 dark:text-indigo-400 text-sm"></i>
+                                <span>Recent Audit Stream</span>
+                            </h3>
+                            <a href="{{ route('admin.audit-logs.index') }}" class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                                View All
+                            </a>
+                        </div>
+                    </x-slot:header>
+
+                    <div class="space-y-3">
+                        @foreach($recentAuditLogs as $log)
+                            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 text-xs">
+                                <div class="flex items-center justify-between gap-1 mb-1">
+                                    <span class="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 truncate">
+                                        {{ $log->event }}
+                                    </span>
+                                    <span class="text-[10px] text-slate-400 shrink-0 font-mono">{{ $log->created_at->diffForHumans(null, true) }}</span>
+                                </div>
+                                <p class="text-slate-600 dark:text-slate-300 text-[11px] leading-snug truncate">{{ $log->description }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                </x-card>
+            @endif
+
             <!-- OAuth Registered Clients Widget with x-card -->
             <x-card>
                 <x-slot:header>

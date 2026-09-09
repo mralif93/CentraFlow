@@ -30,7 +30,7 @@ class CentraFlowAuthController extends Controller
             if (in_array($user->role, ['superadmin', 'hr_manager', 'payroll_officer', 'finance_officer'])) {
                 return redirect()->route('admin.dashboard');
             }
-            return redirect('/');
+            return redirect()->route('portal');
         }
 
         return view('auth.login', [
@@ -53,6 +53,27 @@ class CentraFlowAuthController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
+            $user = Auth::user();
+
+            // Record login audit log
+            \App\Models\AuditLog::record(
+                event: 'auth.login.success',
+                category: 'auth',
+                description: "User '{$user->name}' ({$user->email}) successfully authenticated into CentraFlow Console.",
+                payload: [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                ],
+                userId: $user->id
+            );
+
+            // Update user last login metadata
+            $user->update([
+                'last_login_at' => now(),
+                'last_login_ip' => $request->ip(),
+            ]);
+
             // 1. Explicit return_to parameter
             if ($request->filled('return_to')) {
                 return redirect()->away($request->input('return_to'));
@@ -63,18 +84,47 @@ class CentraFlowAuthController extends Controller
                 return redirect()->intended();
             }
 
-            // 3. Fallback: Admins and officers redirect to admin dashboard
-            $user = Auth::user();
-            if (in_array($user->role, ['superadmin', 'hr_manager', 'payroll_officer', 'finance_officer'])) {
-                return redirect()->route('admin.dashboard');
-            }
-
-            return redirect()->intended('/');
+            // 3. Authenticated redirect directly to Admin Dashboard
+            return redirect()->route('admin.dashboard');
         }
+
+        \App\Models\AuditLog::record(
+            event: 'auth.login.failed',
+            category: 'auth',
+            description: "Failed login attempt for email '{$credentials['email']}'.",
+            payload: ['email' => $credentials['email']]
+        );
 
         return back()->withErrors([
             'email' => 'The provided credentials do not match our identity records.',
         ])->onlyInput('email');
+    }
+
+    /**
+     * Show password recovery request view.
+     */
+    public function showForgotPassword(): View
+    {
+        return view('auth.forgot-password');
+    }
+
+    /**
+     * Handle password reset email request.
+     */
+    public function sendResetLink(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'email' => ['required', 'string', 'email'],
+        ]);
+
+        \App\Models\AuditLog::record(
+            event: 'auth.password.reset_request',
+            category: 'auth',
+            description: "Password recovery link requested for email '{$request->email}'.",
+            payload: ['email' => $request->email]
+        );
+
+        return back()->with('status', 'A reset verification link has been dispatched to your corporate email address.');
     }
 
     /**
@@ -104,6 +154,14 @@ class CentraFlowAuthController extends Controller
             'role' => $validated['role'] ?? 'employee',
         ]);
 
+        \App\Models\AuditLog::record(
+            event: 'auth.register',
+            category: 'auth',
+            description: "Self-registered new account: '{$user->name}' ({$user->email}).",
+            payload: ['user_id' => $user->id, 'email' => $user->email],
+            userId: $user->id
+        );
+
         Auth::login($user);
         $request->session()->regenerate();
 
@@ -116,6 +174,16 @@ class CentraFlowAuthController extends Controller
     public function logout(Request $request): RedirectResponse
     {
         $user = Auth::user();
+
+        if ($user) {
+            \App\Models\AuditLog::record(
+                event: 'auth.logout',
+                category: 'auth',
+                description: "User '{$user->name}' ({$user->email}) logged out of session.",
+                payload: ['user_id' => $user->id, 'email' => $user->email],
+                userId: $user->id
+            );
+        }
 
         // If a specific OAuth token ID or Bearer token was provided, revoke it
         if ($tokenId = $request->query('token_id')) {

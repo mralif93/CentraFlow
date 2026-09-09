@@ -27,10 +27,10 @@ class CentraFlowUserCrudTest extends TestCase
 
     public function test_admin_can_view_user_management_screen(): void
     {
-        $response = $this->actingAs($this->admin)->get(route('admin.id-management'));
+        $response = $this->actingAs($this->admin)->get(route('admin.users.index'));
 
         $response->assertStatus(200);
-        $response->assertSee('Identity &amp; Session Governance', false);
+        $response->assertSee('Users Management');
         $response->assertSee($this->admin->email);
     }
 
@@ -41,14 +41,15 @@ class CentraFlowUserCrudTest extends TestCase
             'is_system' => true,
         ]);
 
-        $response = $this->actingAs($this->admin)->post(route('admin.id-management.store-user'), [
+        $response = $this->actingAs($this->admin)->post(route('admin.users.store'), [
             'name' => 'Michael Scott',
             'email' => 'mscott@centraflow.local',
-            'staff_id' => 'STF-1001',
+            'employee_code' => 'EMP-1001',
             'phone' => '+60123456789',
             'department' => 'Management',
-            'job_title' => 'Regional Manager',
+            'designation' => 'Regional Manager',
             'role' => 'hr_manager',
+            'role_ids' => [$role->id],
             'password' => 'ScrantonPass2026!',
             'status' => 'active',
             'hrms_access' => '1',
@@ -61,12 +62,16 @@ class CentraFlowUserCrudTest extends TestCase
         $response->assertSessionHas('success');
         $this->assertDatabaseHas('users', [
             'email' => 'mscott@centraflow.local',
-            'staff_id' => 'STF-1001',
+            'employee_code' => 'EMP-1001',
+            'designation' => 'Regional Manager',
             'role' => 'hr_manager',
             'status' => 'active',
             'hrms_access' => 1,
             'clinic_access' => 0,
         ]);
+
+        $user = User::where('email', 'mscott@centraflow.local')->first();
+        $this->assertTrue($user->roles()->where('name', 'hr_manager')->exists());
     }
 
     public function test_admin_can_update_user_profile_and_access(): void
@@ -78,13 +83,19 @@ class CentraFlowUserCrudTest extends TestCase
             'status' => 'active',
         ]);
 
-        $response = $this->actingAs($this->admin)->put(route('admin.id-management.update-user', $user), [
+        $role = Role::firstOrCreate(['name' => 'payroll_officer'], [
+            'display_name' => 'Payroll Officer',
+            'is_system' => true,
+        ]);
+
+        $response = $this->actingAs($this->admin)->put(route('admin.users.update', $user), [
             'name' => 'Dwight K. Schrute',
             'role' => 'payroll_officer',
-            'staff_id' => 'STF-999',
+            'employee_code' => 'EMP-999',
             'department' => 'Sales',
-            'job_title' => 'Assistant to Regional Manager',
+            'designation' => 'Assistant to Regional Manager',
             'status' => 'active',
+            'role_ids' => [$role->id],
             'payroll_access' => '1',
             'payroll_role' => 'super_admin',
         ]);
@@ -94,8 +105,11 @@ class CentraFlowUserCrudTest extends TestCase
             'id' => $user->id,
             'name' => 'Dwight K. Schrute',
             'role' => 'payroll_officer',
-            'staff_id' => 'STF-999',
+            'employee_code' => 'EMP-999',
+            'designation' => 'Assistant to Regional Manager',
         ]);
+
+        $this->assertTrue($user->fresh()->roles()->where('name', 'payroll_officer')->exists());
     }
 
     public function test_admin_can_delete_user_account(): void
@@ -105,7 +119,7 @@ class CentraFlowUserCrudTest extends TestCase
             'email' => 'tflenderson@centraflow.local',
         ]);
 
-        $response = $this->actingAs($this->admin)->delete(route('admin.id-management.destroy-user', $user));
+        $response = $this->actingAs($this->admin)->delete(route('admin.users.destroy', $user));
 
         $response->assertSessionHas('success');
         $this->assertDatabaseMissing('users', [
@@ -115,7 +129,7 @@ class CentraFlowUserCrudTest extends TestCase
 
     public function test_admin_cannot_delete_self(): void
     {
-        $response = $this->actingAs($this->admin)->delete(route('admin.id-management.destroy-user', $this->admin));
+        $response = $this->actingAs($this->admin)->delete(route('admin.users.destroy', $this->admin));
 
         $response->assertSessionHas('error');
         $this->assertDatabaseHas('users', [

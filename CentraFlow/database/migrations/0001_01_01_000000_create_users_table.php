@@ -8,16 +8,35 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     * Core Users & Authentication Sessions Module.
      */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uuid')->unique()->nullable();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('staff_id')->nullable();
+            $table->string('employee_code')->nullable()->unique();
+            $table->string('phone')->nullable();
+            $table->string('role')->default('employee'); // superadmin, hr_manager, payroll_officer, finance_officer, employee
+            $table->string('department')->nullable();
+            $table->string('job_title')->nullable();
+            $table->string('designation')->nullable();
+            $table->string('avatar')->nullable();
+            $table->string('status')->default('active'); // active, inactive, suspended
+            $table->boolean('hrms_access')->default(true);
+            $table->string('hrms_role')->nullable();
+            $table->boolean('payroll_access')->default(true);
+            $table->string('payroll_role')->nullable();
+            $table->boolean('clinic_access')->default(true);
+            $table->string('clinic_role')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
+            $table->dateTime('last_login_at')->nullable();
+            $table->string('last_login_ip', 45)->nullable();
             $table->timestamps();
         });
 
@@ -42,8 +61,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
     }
 };

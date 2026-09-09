@@ -122,12 +122,12 @@
                     <i class="bx bx-shield-quarter text-2xl"></i>
                 </div>
                 <div>
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">Centralized ID &amp; Session Governance</h3>
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">Centralized Admin &amp; Session Governance</h3>
                     <p class="text-xs text-slate-600 dark:text-slate-400">Control active web sessions, inspect OAuth 2.0 tokens, and provision master users.</p>
                 </div>
             </div>
-            <a href="{{ route('admin.id-management') }}" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-all shadow-md shadow-indigo-600/25 whitespace-nowrap flex items-center gap-1.5">
-                <span>Open ID Dashboard</span>
+            <a href="{{ route('admin.dashboard') }}" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-all shadow-md shadow-indigo-600/25 whitespace-nowrap flex items-center gap-1.5">
+                <span>Open Admin Console</span>
                 <i class="bx bx-right-arrow-alt text-base"></i>
             </a>
         </div>

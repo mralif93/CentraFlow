@@ -37,7 +37,7 @@ class CentraFlowAuthWebTest extends TestCase
         $this->assertAuthenticatedAs($admin);
     }
 
-    public function test_employee_user_redirects_to_launcher_after_login(): void
+    public function test_authenticated_user_redirects_to_admin_dashboard_after_login(): void
     {
         $employee = User::create([
             'name' => 'General Employee',
@@ -51,8 +51,21 @@ class CentraFlowAuthWebTest extends TestCase
             'password' => 'secret1234',
         ]);
 
-        $response->assertRedirect('/');
+        $response->assertRedirect('/admin/dashboard');
         $this->assertAuthenticatedAs($employee);
+    }
+
+    public function test_dashboard_route_redirects_to_admin_dashboard(): void
+    {
+        $user = User::create([
+            'name' => 'Sara Connor',
+            'email' => 'sara@centraflow.local',
+            'password' => Hash::make('secret1234'),
+            'role' => 'employee',
+        ]);
+
+        $response = $this->actingAs($user)->get('/dashboard');
+        $response->assertRedirect('/admin/dashboard');
     }
 
     public function test_user_can_register_new_master_account(): void
@@ -91,5 +104,23 @@ class CentraFlowAuthWebTest extends TestCase
 
         $response->assertRedirect('http://localhost:8002/login');
         $this->assertGuest();
+    }
+
+    public function test_forgot_password_screen_renders_successfully(): void
+    {
+        $response = $this->get('/forgot-password');
+        $response->assertStatus(200);
+        $response->assertSee('Recover Password');
+        $response->assertSee('Send Reset Instructions');
+    }
+
+    public function test_forgot_password_submission_dispatches_status(): void
+    {
+        $response = $this->post('/forgot-password', [
+            'email' => 'admin@centraflow.local',
+        ]);
+
+        $response->assertSessionHas('status');
+        $response->assertRedirect();
     }
 }

@@ -41,7 +41,7 @@ class UserModuleFullCrudTest extends TestCase
             'status' => 'active',
         ]);
 
-        $response = $this->actingAs($this->admin)->get(route('admin.id-management'));
+        $response = $this->actingAs($this->admin)->get(route('admin.users.index'));
 
         $response->assertStatus(200);
         $response->assertSee('Alice Johnson');
@@ -57,45 +57,40 @@ class UserModuleFullCrudTest extends TestCase
      */
     public function test_admin_can_create_user_with_full_credentials(): void
     {
-        $response = $this->actingAs($this->admin)->post(route('admin.id-management.store-user'), [
+        $response = $this->actingAs($this->admin)->post(route('admin.users.store'), [
             'name' => 'Bob Builder',
             'email' => 'bob@centraflow.local',
-            'staff_id' => 'STF-1002',
+            'staff_id' => 'EMP-5555',
             'phone' => '+60199887766',
-            'department' => 'Engineering',
-            'job_title' => 'Senior Developer',
-            'role' => 'payroll_officer',
-            'password' => 'BobPass2026!',
+            'department' => 'Construction & Facilities',
+            'job_title' => 'Project Lead',
+            'role' => 'employee',
+            'password' => 'BobCanFixIt2026!',
             'status' => 'active',
             'hrms_access' => '1',
-            'hrms_role' => 'Department Manager',
+            'hrms_role' => 'supervisor',
             'payroll_access' => '1',
-            'payroll_role' => 'payroll_officer',
+            'payroll_role' => 'employee',
             'clinic_access' => '1',
-            'clinic_role' => 'receptionist',
+            'clinic_role' => 'patient',
         ]);
 
         $response->assertSessionHas('success');
         $this->assertDatabaseHas('users', [
-            'name' => 'Bob Builder',
             'email' => 'bob@centraflow.local',
-            'staff_id' => 'STF-1002',
+            'staff_id' => 'EMP-5555',
             'phone' => '+60199887766',
-            'department' => 'Engineering',
-            'job_title' => 'Senior Developer',
-            'role' => 'payroll_officer',
+            'department' => 'Construction & Facilities',
+            'job_title' => 'Project Lead',
             'status' => 'active',
             'hrms_access' => 1,
-            'hrms_role' => 'Department Manager',
             'payroll_access' => 1,
-            'payroll_role' => 'payroll_officer',
             'clinic_access' => 1,
-            'clinic_role' => 'receptionist',
         ]);
     }
 
     /**
-     * Test 3: EDIT (Update existing user profile and clearances)
+     * Test 3: EDIT & UPDATE (Update all user fields and clearances)
      */
     public function test_admin_can_edit_and_update_existing_user(): void
     {
@@ -106,7 +101,7 @@ class UserModuleFullCrudTest extends TestCase
             'status' => 'active',
         ]);
 
-        $response = $this->actingAs($this->admin)->put(route('admin.id-management.update-user', $user), [
+        $response = $this->actingAs($this->admin)->put(route('admin.users.update', $user), [
             'name' => 'Sir Charles Spencer Chaplin',
             'role' => 'finance_officer',
             'staff_id' => 'STF-9999',
@@ -149,7 +144,7 @@ class UserModuleFullCrudTest extends TestCase
             'email' => 'temp@centraflow.local',
         ]);
 
-        $response = $this->actingAs($this->admin)->delete(route('admin.id-management.destroy-user', $user));
+        $response = $this->actingAs($this->admin)->delete(route('admin.users.destroy', $user));
 
         $response->assertSessionHas('success');
         $this->assertDatabaseMissing('users', [
@@ -162,7 +157,7 @@ class UserModuleFullCrudTest extends TestCase
      */
     public function test_admin_cannot_delete_own_account(): void
     {
-        $response = $this->actingAs($this->admin)->delete(route('admin.id-management.destroy-user', $this->admin));
+        $response = $this->actingAs($this->admin)->delete(route('admin.users.destroy', $this->admin));
 
         $response->assertSessionHas('error');
         $this->assertDatabaseHas('users', [

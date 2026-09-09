@@ -39,13 +39,13 @@
 
 <div
     id="{{ $modalId }}"
-    class="hidden fixed inset-0 z-50 overflow-y-auto"
+    class="hidden fixed inset-0 z-[100] overflow-y-auto"
     role="dialog"
     aria-modal="true"
 >
-    <!-- Dark Dim Backdrop with Glassmorphism Blur -->
+    <!-- Dark Dim Backdrop with Glassmorphism Blur covering entire viewport -->
     <div
-        class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm transition-opacity"
+        class="fixed inset-0 bg-slate-950/75 backdrop-blur-md transition-opacity"
         onclick="document.getElementById('{{ $modalId }}').classList.add('hidden')"
     ></div>
 

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -14,14 +15,54 @@ class CentraFlowSystemSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Create Core Users with Unified Enterprise Attributes
+        // 1. Seed Core RBAC Roles
+        $roles = [
+            [
+                'name' => 'superadmin',
+                'display_name' => 'Super Administrator',
+                'description' => 'Unrestricted access across identity and all enterprise modules',
+                'is_system' => true,
+            ],
+            [
+                'name' => 'hr_manager',
+                'display_name' => 'HR Administrator',
+                'description' => 'Full administration of employees, leaves, attendance, and recruitment',
+                'is_system' => true,
+            ],
+            [
+                'name' => 'payroll_officer',
+                'display_name' => 'Payroll Officer',
+                'description' => 'Payroll runs, calculations, approval, and statutory filings',
+                'is_system' => true,
+            ],
+            [
+                'name' => 'finance_officer',
+                'display_name' => 'Finance Director',
+                'description' => 'Banking, claims, financial statements, and clinical invoicing',
+                'is_system' => true,
+            ],
+            [
+                'name' => 'employee',
+                'display_name' => 'Standard Employee',
+                'description' => 'Self-service portal, payslips, leaves, and attendance',
+                'is_system' => true,
+            ],
+        ];
+
+        $roleModels = [];
+        foreach ($roles as $r) {
+            $roleModels[$r['name']] = Role::updateOrCreate(['name' => $r['name']], $r);
+        }
+
+        // 2. Create Core Users with Unified Enterprise Attributes & Attach Roles
         $users = [
             [
                 'name' => 'Super Administrator',
                 'email' => 'admin@centraflow.local',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('password'),
                 'role' => 'superadmin',
                 'staff_id' => 'EMP-0001',
+                'employee_code' => 'EMP-0001',
                 'phone' => '+60123456780',
                 'department' => 'Executive Office',
                 'job_title' => 'Chief Technology Officer',
@@ -30,9 +71,10 @@ class CentraFlowSystemSeeder extends Seeder
             [
                 'name' => 'Sarah HR Manager',
                 'email' => 'hrmanager@centraflow.local',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('password'),
                 'role' => 'hr_manager',
                 'staff_id' => 'EMP-0002',
+                'employee_code' => 'EMP-0002',
                 'phone' => '+60123456781',
                 'department' => 'Human Resources',
                 'job_title' => 'People Operations Lead',
@@ -41,9 +83,10 @@ class CentraFlowSystemSeeder extends Seeder
             [
                 'name' => 'Alex Payroll Officer',
                 'email' => 'payroll@centraflow.local',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('password'),
                 'role' => 'payroll_officer',
                 'staff_id' => 'EMP-0003',
+                'employee_code' => 'EMP-0003',
                 'phone' => '+60123456782',
                 'department' => 'Finance & Payroll',
                 'job_title' => 'Payroll Specialist',
@@ -52,9 +95,10 @@ class CentraFlowSystemSeeder extends Seeder
             [
                 'name' => 'Fiona Finance Officer',
                 'email' => 'finance@centraflow.local',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('password'),
                 'role' => 'finance_officer',
                 'staff_id' => 'EMP-0004',
+                'employee_code' => 'EMP-0004',
                 'phone' => '+60123456783',
                 'department' => 'Finance & Billing',
                 'job_title' => 'Billing Administrator',
@@ -63,9 +107,10 @@ class CentraFlowSystemSeeder extends Seeder
             [
                 'name' => 'John Employee',
                 'email' => 'john.doe@centraflow.local',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('password'),
                 'role' => 'employee',
                 'staff_id' => 'EMP-0005',
+                'employee_code' => 'EMP-0005',
                 'phone' => '+60123456784',
                 'department' => 'Product & Design',
                 'job_title' => 'Senior UI/UX Designer',
@@ -74,10 +119,13 @@ class CentraFlowSystemSeeder extends Seeder
         ];
 
         foreach ($users as $data) {
-            User::updateOrCreate(['email' => $data['email']], $data);
+            $user = User::updateOrCreate(['email' => $data['email']], $data);
+            if (isset($roleModels[$data['role']])) {
+                $user->roles()->syncWithoutDetaching([$roleModels[$data['role']]->id]);
+            }
         }
 
-        // 2. Register Sub-system OAuth Clients
+        // 3. Register Sub-system OAuth Clients
         $clients = [
             [
                 'id' => '9d12a101-0001-4000-8000-000000000001',

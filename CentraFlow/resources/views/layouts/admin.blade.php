@@ -74,11 +74,25 @@
                         <span>System Overview</span>
                     </a>
                     <a
-                        href="{{ route('admin.id-management') }}"
-                        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {{ request()->routeIs('admin.id-management*') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white' }}"
+                        href="{{ route('admin.users.index') }}"
+                        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {{ request()->routeIs('admin.users.*') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white' }}"
                     >
-                        <i class="bx bx-id-card text-lg {{ request()->routeIs('admin.id-management*') ? 'text-white' : 'text-purple-500' }}"></i>
-                        <span>Identities &amp; Sessions</span>
+                        <i class="bx bx-user-pin text-lg {{ request()->routeIs('admin.users.*') ? 'text-white' : 'text-purple-500' }}"></i>
+                        <span>Users</span>
+                    </a>
+                    <a
+                        href="{{ route('admin.sessions.index') }}"
+                        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {{ request()->routeIs('admin.sessions.*') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white' }}"
+                    >
+                        <i class="bx bx-broadcast text-lg {{ request()->routeIs('admin.sessions.*') ? 'text-white' : 'text-emerald-500' }}"></i>
+                        <span>Sessions</span>
+                    </a>
+                    <a
+                        href="{{ route('admin.audit-logs.index') }}"
+                        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {{ request()->routeIs('admin.audit-logs.*') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white' }}"
+                    >
+                        <i class="bx bx-history text-lg {{ request()->routeIs('admin.audit-logs.*') ? 'text-white' : 'text-amber-500' }}"></i>
+                        <span>Audit Trail</span>
                     </a>
                 </div>
             </div>
@@ -228,9 +242,21 @@
                         </div>
 
                         <div class="py-1.5 px-2 space-y-0.5">
-                            <a href="{{ route('admin.id-management') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-indigo-600 dark:hover:text-white transition">
-                                <i class="bx bx-id-card text-base text-slate-400"></i>
-                                <span>Identities &amp; Sessions</span>
+                            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-indigo-600 dark:hover:text-white transition">
+                                <i class="bx bxs-dashboard text-base text-slate-400"></i>
+                                <span>System Overview</span>
+                            </a>
+                            <a href="{{ route('admin.users.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-indigo-600 dark:hover:text-white transition">
+                                <i class="bx bx-user-pin text-base text-slate-400"></i>
+                                <span>Users Directory</span>
+                            </a>
+                            <a href="{{ route('admin.sessions.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-indigo-600 dark:hover:text-white transition">
+                                <i class="bx bx-broadcast text-base text-slate-400"></i>
+                                <span>Active Sessions</span>
+                            </a>
+                            <a href="{{ route('admin.audit-logs.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-indigo-600 dark:hover:text-white transition">
+                                <i class="bx bx-history text-base text-slate-400"></i>
+                                <span>Activity Audit Trail</span>
                             </a>
                             <a href="{{ route('home') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-indigo-600 dark:hover:text-white transition">
                                 <i class="bx bx-grid-alt text-base text-slate-400"></i>

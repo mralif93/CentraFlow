@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'CentraFlow — Enterprise Operations Hub')</title>
+    <title>@yield('title', 'CentraFlow — Enterprise Operations Hub & SSO Gateway')</title>
 
     <!-- Theme Initialization to prevent FOUC -->
     <script>
@@ -73,20 +73,68 @@
                 <x-theme-toggle />
 
                 @auth
-                    <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 border border-indigo-400/30 transition-all">
+                    <a href="{{ route('admin.dashboard') }}" class="hidden sm:inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 border border-indigo-400/30 transition-all">
                         <i class="bx bxs-dashboard text-base sm:text-lg"></i>
                         <span>Admin Console</span>
                     </a>
-                    <form method="POST" action="{{ route('logout') }}" class="inline">
+                    <form method="POST" action="{{ route('logout') }}" class="hidden sm:inline">
                         @csrf
-                        <button type="submit" class="p-2 sm:px-3 sm:py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 transition-all border border-slate-200 dark:border-slate-700">
-                            <i class="bx bx-log-out text-base sm:hidden"></i>
+                        <button type="submit" class="p-2 sm:px-3 sm:py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 transition-all border border-slate-200 dark:border-slate-700 cursor-pointer">
                             <span class="hidden sm:inline">Sign Out</span>
                         </button>
                     </form>
                 @else
-                    <a href="{{ route('login') }}" class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 border border-indigo-400/30 transition-all">
+                    <a href="{{ route('login') }}" class="hidden sm:inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 border border-indigo-400/30 transition-all">
                         <i class="bx bx-shield-quarter text-base sm:text-lg"></i>
+                        <span>Sign In</span>
+                    </a>
+                @endauth
+
+                <!-- Mobile Menu Button (Exact HRMS Match) -->
+                <button
+                    type="button"
+                    onclick="document.getElementById('public-mobile-menu').classList.toggle('hidden')"
+                    class="md:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                    aria-label="Toggle navigation menu"
+                >
+                    <i class="bx bx-menu text-2xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Drawer Dropdown (Exact HRMS Match) -->
+        <div id="public-mobile-menu" class="hidden md:hidden border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-4 space-y-2 text-xs font-bold shadow-lg animate__animated animate__fadeIn">
+            <a href="{{ route('home') }}" onclick="document.getElementById('public-mobile-menu').classList.add('hidden')" class="block px-3 py-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">Launcher</a>
+            <a href="http://localhost:8001/login" target="_blank" onclick="document.getElementById('public-mobile-menu').classList.add('hidden')" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <span>HRMS Subsystem</span>
+                <span class="px-1.5 py-0.5 text-[9px] font-mono rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">:8001</span>
+            </a>
+            <a href="http://localhost:8002/login" target="_blank" onclick="document.getElementById('public-mobile-menu').classList.add('hidden')" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <span>Payroll Subsystem</span>
+                <span class="px-1.5 py-0.5 text-[9px] font-mono rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">:8002</span>
+            </a>
+            <a href="http://localhost:8003/login" target="_blank" onclick="document.getElementById('public-mobile-menu').classList.add('hidden')" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <span>Clinic Invoicing</span>
+                <span class="px-1.5 py-0.5 text-[9px] font-mono rounded bg-purple-500/10 text-purple-600 dark:text-purple-400">:8003</span>
+            </a>
+            
+            <div class="pt-2 border-t border-slate-100 dark:border-slate-800">
+                @auth
+                    <div class="space-y-2">
+                        <a href="{{ route('admin.dashboard') }}" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold bg-indigo-600 text-white shadow-md">
+                            <i class="bx bxs-dashboard text-base"></i>
+                            <span>Admin Console</span>
+                        </a>
+                        <form method="POST" action="{{ route('logout') }}" class="w-full">
+                            @csrf
+                            <button type="submit" class="w-full py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                                Sign Out
+                            </button>
+                        </form>
+                    </div>
+                @else
+                    <a href="{{ route('login') }}" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold bg-indigo-600 text-white shadow-md">
+                        <i class="bx bx-shield-quarter text-base"></i>
                         <span>Sign In</span>
                     </a>
                 @endauth
